@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // ============ ИМПОРТЫ И ТИПЫ ============
-import type { HTMLAttributes } from "vue";
-import type { MouseMode } from "~/components/ui/InspiraShaderToy";
-import { InspiraShaderToy } from "~/components/ui/InspiraShaderToy";
+import type { HTMLAttributes } from 'vue';
+import type { MouseMode } from './InspiraShaderToy';
+import { InspiraShaderToy } from './InspiraShaderToy';
 
 // Интерфейс для настройки шума поверх шейдера
 interface NoiseConfig {

@@ -43,6 +43,22 @@
 
     <!-- Main content -->
     <main>
+      
+      <!-- Silk animated background (effect 1) - infinite animation -->
+      <div class="fixed inset-0 z-0 pointer-events-none">
+        <ClientOnly>
+          <UiSilkBackground
+            :hue="220"
+            :saturation="0.3"
+            :brightness="0.55"
+            :speed="0.5"
+          />
+        </ClientOnly>
+      </div>
+
+      <!-- Dark overlay -->
+      <!-- <div class="fixed inset-0 z-0 bg-black/65 pointer-events-none" /> -->
+
       <slot />
     </main>
 

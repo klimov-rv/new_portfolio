@@ -1,25 +1,31 @@
-import { Camera, Geometry, Mesh, Program, Renderer, Transform } from "ogl";
+import { Camera, Geometry, Mesh, Program, Renderer, Transform } from 'ogl';
+import type { ShaderControls } from '~/types/shader';
 
+// Конфиг для компиляции шейдера
 export interface ShaderConfig {
   source: string;
 }
 
+// Состояние мыши в пикселях canvas
 export interface MouseState {
-  x: number;
-  y: number;
-  clickX: number;
-  clickY: number;
+  x: number; // Текущая позиция X
+  y: number; // Текущая позиция Y
+  clickX: number; // Последняя позиция клика по X
+  clickY: number; // Последняя позиция клика по Y
 }
 
+// HSV управление цветом (Hue-Saturation-Value)
 export interface HSVControls {
-  hue: number; // 0-360
-  saturation: number; // 0-1
-  brightness: number; // 0-1
+  hue: number; // 0-360 градусов
+  saturation: number; // 0-1 (интенсивность цвета)
+  brightness: number; // 0-1 (яркость)
 }
 
-export type MouseMode = "click" | "hover";
+// Режим обработки мыши: 'click' = только при клике, 'hover' = постоянно следует
+export type MouseMode = 'click' | 'hover';
 
 export class InspiraShaderToy {
+  // WebGL объекты
   private renderer: Renderer;
   private camera: Camera;
   private scene: Transform;
@@ -27,29 +33,29 @@ export class InspiraShaderToy {
   private program: Program | null = null;
   private mesh: Mesh | null = null;
 
-  // Timing
+  // Анимация и время
   private isPlaying: boolean = false;
   private firstDrawTime: number = 0;
   private prevDrawTime: number = 0;
+  private iFrame: number = 0;
+
+  // Таймирование кадров
   private targetFPS: number = 60;
   private frameInterval: number = 1000 / 60;
   private lastFrameTime: number = 0;
 
-  // Callback
-  private onDrawCallback?: () => void;
-
-  // Uniforms
-  private iFrame: number = 0;
+  // Состояние шейдера (передается как uniforms)
   private iMouse: MouseState = { x: 0, y: 0, clickX: 0, clickY: 0 };
   private hsv: HSVControls = { hue: 0, saturation: 1, brightness: 1 };
-  private _mouseMode: MouseMode = "click";
-  private _mouseSensitivity: number = 1.0; // New: mouse sensitivity multiplier
-  private _mouseDamping: number = 0.9; // New: mouse movement damping factor (0-1)
+  private _speed: number = 1; // Множитель скорости анимации
 
-  private _speed: number = 1; // Speed multiplier
+  // Управление мышью
+  private _mouseMode: MouseMode = 'click';
+  private _mouseSensitivity: number = 1.0;
+  private _mouseDamping: number = 0.9; // Инерция движения мыши (0-0.99)
 
-  // Shader source
-  private shaderSource: string = "";
+  // Шейдер
+  private shaderSource: string = '';
 
   private readonly vertexShader = `#version 300 es
     #ifdef GL_ES
@@ -80,14 +86,12 @@ export class InspiraShaderToy {
     
     out vec4 fragColor;
     
-    // HSV to RGB conversion
     vec3 hsv2rgb(vec3 c) {
         vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
         vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
         return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
     }
     
-    // RGB to HSV conversion
     vec3 rgb2hsv(vec3 c) {
         vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
         vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -97,7 +101,6 @@ export class InspiraShaderToy {
         return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
     }
     
-    // Apply HSV adjustments
     vec3 applyHSV(vec3 color, vec3 hsvAdjust) {
         vec3 hsv = rgb2hsv(color);
         hsv.x = fract(hsv.x + hsvAdjust.x / 360.0);
@@ -112,7 +115,6 @@ export class InspiraShaderToy {
         vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
         mainImage(color, gl_FragCoord.xy);
         
-        // Apply HSV adjustments if not default
         if (iHSV.x != 0.0 || iHSV.y != 1.0 || iHSV.z != 1.0) {
             color.rgb = applyHSV(color.rgb, iHSV);
         }
@@ -126,14 +128,10 @@ export class InspiraShaderToy {
     mouseMode?: MouseMode,
     fps?: number,
   ) {
-    if (mouseMode) {
-      this._mouseMode = mouseMode;
-    }
-    if (fps) {
-      this.setFrameRate(fps);
-    }
+    if (mouseMode) this._mouseMode = mouseMode;
+    if (fps) this.setFrameRate(fps);
 
-    // Create renderer with WebGL 2 context
+    // Инициализируем WebGL рендер (требует WebGL 2)
     this.renderer = new Renderer({
       width: this.container.clientWidth,
       height: this.container.clientHeight,
@@ -142,25 +140,25 @@ export class InspiraShaderToy {
       depth: false,
       stencil: false,
       antialias: true,
-      powerPreference: "high-performance",
+      powerPreference: 'high-performance',
     });
 
-    // Ensure WebGL 2 context
-    if (!this.renderer.gl || !(this.renderer.gl instanceof WebGL2RenderingContext)) {
-      throw new Error("WebGL 2 not supported");
+    if (
+      !this.renderer.gl ||
+      !(this.renderer.gl instanceof WebGL2RenderingContext)
+    ) {
+      throw new Error('WebGL 2 not supported');
     }
 
-    // Append canvas to container
     this.container.appendChild(this.renderer.gl.canvas);
 
-    // Setup camera (orthographic for full-screen quad)
+    // Ортографическая камера для полноэкранного quad
     this.camera = new Camera(this.renderer.gl);
     this.camera.position.z = 1;
 
-    // Setup scene
     this.scene = new Transform();
 
-    // Setup geometry (full-screen quad)
+    // Полноэкранный quad (два треугольника, 6 вершин)
     this.geometry = new Geometry(this.renderer.gl, {
       position: {
         size: 2,
@@ -176,34 +174,36 @@ export class InspiraShaderToy {
     this.setupResizeHandler();
   }
 
+  // Обработка мыши и касаний (mouse, touchmove, touchstart)
   private setupMouseEvents(): void {
     const canvas = this.renderer.gl.canvas;
     let isMouseDown = false;
 
+    // Масштабируем координаты мыши на DPR и применяем чувствительность
     const getScaledMousePos = (event: MouseEvent | Touch) => {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio;
-
-      // Get mouse position relative to canvas
       const x = event.clientX - rect.left;
+      // Флипим Y, потому что в GLSL вверх это +Y, а в DOM это -Y
       const y = event.clientY - rect.top;
 
-      // Scale by DPR, apply sensitivity, and flip Y-axis
       return {
         x: x * dpr * this._mouseSensitivity,
-        y: (canvas.height - y * dpr) * this._mouseSensitivity, // Flip Y to match GLSL coordinates
+        y: (canvas.height - y * dpr) * this._mouseSensitivity,
       };
     };
 
-    canvas.addEventListener("mousemove", (event: MouseEvent) => {
+    canvas.addEventListener('mousemove', (event: MouseEvent) => {
       const { x: newX, y: newY } = getScaledMousePos(event);
 
-      // Apply damping with configurable factor
-      this.iMouse.x = this.iMouse.x * this._mouseDamping + newX * (1 - this._mouseDamping);
-      this.iMouse.y = this.iMouse.y * this._mouseDamping + newY * (1 - this._mouseDamping);
+      // Плавное движение мыши с инерцией (damping)
+      this.iMouse.x =
+        this.iMouse.x * this._mouseDamping + newX * (1 - this._mouseDamping);
+      this.iMouse.y =
+        this.iMouse.y * this._mouseDamping + newY * (1 - this._mouseDamping);
 
-      // Handle click coordinates based on mode
-      if (this._mouseMode === "hover" && !isMouseDown) {
+      // В режиме 'hover' клик = текущая позиция мыши
+      if (this._mouseMode === 'hover' && !isMouseDown) {
         this.iMouse.clickX = this.iMouse.x;
         this.iMouse.clickY = this.iMouse.y;
       } else if (isMouseDown) {
@@ -212,61 +212,62 @@ export class InspiraShaderToy {
       }
     });
 
-    canvas.addEventListener("mousedown", (event: MouseEvent) => {
+    canvas.addEventListener('mousedown', (event: MouseEvent) => {
       isMouseDown = true;
       const { x: clickX, y: clickY } = getScaledMousePos(event);
 
-      if (this._mouseMode === "click") {
+      // В режиме 'click' фиксируем позицию клика
+      if (this._mouseMode === 'click') {
         this.iMouse.clickX = clickX;
         this.iMouse.clickY = clickY;
       }
     });
 
-    canvas.addEventListener("mouseup", () => {
+    canvas.addEventListener('mouseup', () => {
       isMouseDown = false;
     });
 
-    // Handle touch events for mobile
-    canvas.addEventListener("touchmove", (event: TouchEvent) => {
+    // Мобильная поддержка
+    canvas.addEventListener('touchmove', (event: TouchEvent) => {
       event.preventDefault();
       const touch = event.touches[0];
-      const { x: newX, y: newY } = getScaledMousePos(touch);
+      if (!touch) return;
 
+      const { x: newX, y: newY } = getScaledMousePos(touch);
       this.iMouse.x = newX;
       this.iMouse.y = newY;
 
-      if (this._mouseMode === "hover") {
+      if (this._mouseMode === 'hover') {
         this.iMouse.clickX = newX;
         this.iMouse.clickY = newY;
       }
     });
 
-    canvas.addEventListener("touchstart", (event: TouchEvent) => {
+    canvas.addEventListener('touchstart', (event: TouchEvent) => {
       event.preventDefault();
       isMouseDown = true;
       const touch = event.touches[0];
+      if (!touch) return;
       const { x: clickX, y: clickY } = getScaledMousePos(touch);
 
-      if (this._mouseMode === "click") {
+      if (this._mouseMode === 'click') {
         this.iMouse.clickX = clickX;
         this.iMouse.clickY = clickY;
       }
     });
 
-    canvas.addEventListener("touchend", () => {
+    canvas.addEventListener('touchend', () => {
       isMouseDown = false;
     });
   }
 
+  // Респонсивный шейдер - когда окно меняется, сколируем canvas
   private setupResizeHandler(): void {
     const resizeObserver = new ResizeObserver(() => {
       const width = this.container.clientWidth;
       const height = this.container.clientHeight;
 
-      // Update renderer size
       this.renderer.setSize(width, height);
-
-      // Update viewport
       this.renderer.gl.viewport(
         0,
         0,
@@ -274,7 +275,7 @@ export class InspiraShaderToy {
         height * window.devicePixelRatio,
       );
 
-      // Update resolution uniform if program exists
+      // Обновляем разрешение в шейдере
       if (this.program) {
         this.program.uniforms.iResolution.value = [
           width * window.devicePixelRatio,
@@ -287,6 +288,7 @@ export class InspiraShaderToy {
     resizeObserver.observe(this.container);
   }
 
+  // Компилируем шейдер в программу WebGL (частая операция - когда меняется код шейдера)
   private compileProgram(): boolean {
     if (!this.shaderSource) return false;
 
@@ -310,7 +312,9 @@ export class InspiraShaderToy {
           iFrame: { value: 0 },
           iMouse: { value: [0, 0, 0, 0] },
           iDate: { value: [0, 0, 0, 0] },
-          iHSV: { value: [this.hsv.hue, this.hsv.saturation, this.hsv.brightness] },
+          iHSV: {
+            value: [this.hsv.hue, this.hsv.saturation, this.hsv.brightness],
+          },
           iSpeed: { value: this._speed },
         },
       });
@@ -323,20 +327,18 @@ export class InspiraShaderToy {
 
       return true;
     } catch (error) {
-      console.error("Failed to compile shader:", error);
+      console.error('Failed to compile shader:', error);
       return false;
     }
   }
 
+  // Отрисовка кадра: обновляем uniforms и рендерим на экран
   private draw(): void {
-    if (!this.program || !this.mesh) {
-      console.warn("Program or mesh not initialized");
-      return;
-    }
+    if (!this.program || !this.mesh) return;
 
     const now = this.isPlaying ? Date.now() : this.prevDrawTime;
 
-    // Frame rate limiting
+    // Ограничиваем FPS если нужна низкая частота
     if (this.isPlaying && this.targetFPS < 60) {
       const elapsed = now - this.lastFrameTime;
       if (elapsed < this.frameInterval) {
@@ -346,22 +348,23 @@ export class InspiraShaderToy {
       this.lastFrameTime = now - (elapsed % this.frameInterval);
     }
 
-    const date = new Date(now);
-
+    // Первый кадр = начало времени анимации
     if (this.firstDrawTime === 0) {
       this.firstDrawTime = now;
     }
 
-    if (this.onDrawCallback) {
-      this.onDrawCallback();
-    }
-
+    const date = new Date(now);
     const iTimeDelta = (now - this.prevDrawTime) * 0.001 * this._speed;
     const iTime = (now - this.firstDrawTime) * 0.001 * this._speed;
-    const iDate = [date.getFullYear(), date.getMonth(), date.getDate(), date.getTime() * 0.001];
+    const iDate = [
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getTime() * 0.001,
+    ];
 
     if (this.program && this.mesh) {
-      // Update uniforms
+      // Обновляем все uniforms перед рендером
       this.program.uniforms.iResolution.value = [
         this.container.clientWidth * window.devicePixelRatio,
         this.container.clientHeight * window.devicePixelRatio,
@@ -378,10 +381,14 @@ export class InspiraShaderToy {
         this.iMouse.clickY,
       ];
       this.program.uniforms.iDate.value = iDate;
-      this.program.uniforms.iHSV.value = [this.hsv.hue, this.hsv.saturation, this.hsv.brightness];
+      this.program.uniforms.iHSV.value = [
+        this.hsv.hue,
+        this.hsv.saturation,
+        this.hsv.brightness,
+      ];
       this.program.uniforms.iSpeed.value = this._speed;
 
-      // Render
+      // Рендер!
       this.renderer.render({ scene: this.mesh, camera: this.camera });
     }
 
@@ -389,6 +396,7 @@ export class InspiraShaderToy {
     this.iFrame++;
   }
 
+  // RequestAnimationFrame loop
   private animate = (): void => {
     if (this.isPlaying) {
       this.draw();
@@ -396,74 +404,55 @@ export class InspiraShaderToy {
     }
   };
 
-  // Public methods
+  // =========== PUBLIC INTERFACE ============
+  // Загружаем и компилируем код шейдера
   public setShader(config: ShaderConfig): boolean {
     this.shaderSource = config.source;
     const success = this.compileProgram();
-
-    // If playing, trigger a redraw
     if (success && this.isPlaying) {
       this.draw();
     }
-
     return success;
   }
 
+  // HSV контролы для цвета
   public setHSV(hsv: Partial<HSVControls>): void {
     if (hsv.hue !== undefined) this.hsv.hue = hsv.hue;
     if (hsv.saturation !== undefined) this.hsv.saturation = hsv.saturation;
     if (hsv.brightness !== undefined) this.hsv.brightness = hsv.brightness;
-
-    // Update immediately if not playing
-    if (!this.isPlaying && this.program && this.mesh) {
-      this.draw();
-    }
+    if (!this.isPlaying && this.program && this.mesh) this.draw();
   }
 
   public setHue(val: number) {
     this.hsv.hue = val;
-
-    // Update immediately if not playing
-    if (!this.isPlaying && this.program && this.mesh) {
-      this.draw();
-    }
+    if (!this.isPlaying && this.program && this.mesh) this.draw();
   }
 
   public setSaturation(val: number) {
     this.hsv.saturation = val;
-
-    // Update immediately if not playing
-    if (!this.isPlaying && this.program && this.mesh) {
-      this.draw();
-    }
+    if (!this.isPlaying && this.program && this.mesh) this.draw();
   }
 
   public setBrightness(val: number) {
     this.hsv.brightness = val;
-
-    // Update immediately if not playing
-    if (!this.isPlaying && this.program && this.mesh) {
-      this.draw();
-    }
+    if (!this.isPlaying && this.program && this.mesh) this.draw();
   }
 
   public getHSV(): HSVControls {
     return { ...this.hsv };
   }
-  // New speed methods
+
+  // Скорость анимации (множитель для iTime)
   public setSpeed(val: number): void {
     this._speed = Math.max(0, val);
-
-    // Update immediately if not playing
-    if (!this.isPlaying && this.program && this.mesh) {
-      this.draw();
-    }
+    if (!this.isPlaying && this.program && this.mesh) this.draw();
   }
 
   public getSpeed(): number {
     return this._speed;
   }
 
+  // Таймирование
   public setFrameRate(fps: number): void {
     this.targetFPS = Math.max(1, Math.min(60, fps));
     this.frameInterval = 1000 / this.targetFPS;
@@ -473,18 +462,11 @@ export class InspiraShaderToy {
     return this.targetFPS;
   }
 
-  public setOnDraw(callback: () => void): void {
-    this.onDrawCallback = callback;
-  }
-
   public time(): number {
     return (this.prevDrawTime - this.firstDrawTime) * 0.001 * this._speed;
   }
 
-  public isPlayingState(): boolean {
-    return this.isPlaying;
-  }
-
+  // Управление воспроизведением
   public reset(): void {
     const now = Date.now();
     this.firstDrawTime = now;
@@ -510,14 +492,27 @@ export class InspiraShaderToy {
     }
   }
 
-  public dispose(): void {
-    this.pause();
-    if (this.renderer.gl.canvas.parentElement) {
-      this.renderer.gl.canvas.parentElement.removeChild(this.renderer.gl.canvas);
-    }
+  public isPlayingState(): boolean {
+    return this.isPlaying;
   }
 
-  // Getters and Setters
+  // Управление мышью
+  public setMouseSensitivity(sensitivity: number): void {
+    this._mouseSensitivity = Math.max(0.1, Math.min(5.0, sensitivity));
+  }
+
+  public getMouseSensitivity(): number {
+    return this._mouseSensitivity;
+  }
+
+  public setMouseDamping(damping: number): void {
+    this._mouseDamping = Math.max(0, Math.min(0.99, damping));
+  }
+
+  public getMouseDamping(): number {
+    return this._mouseDamping;
+  }
+
   public get mouseMode(): MouseMode {
     return this._mouseMode;
   }
@@ -525,29 +520,26 @@ export class InspiraShaderToy {
   public set mouseMode(val: MouseMode) {
     this._mouseMode = val;
   }
-  public get speed(): number {
-    return this._speed;
+
+  public setControls(controls: ShaderControls) {
+    if (controls.hue !== undefined) this.setHue(controls.hue);
+    if (controls.saturation !== undefined)
+      this.setSaturation(controls.saturation);
+    if (controls.brightness !== undefined)
+      this.setBrightness(controls.brightness);
+    if (controls.speed !== undefined) this.setSpeed(controls.speed);
+    if (controls.mouseSensitivity !== undefined)
+      this.setMouseSensitivity(controls.mouseSensitivity);
+    if (controls.damping !== undefined) this.setMouseDamping(controls.damping);
   }
 
-  public set speed(val: number) {
-    this.setSpeed(val);
-  }
-
-  // New mouse sensitivity methods
-  public setMouseSensitivity(sensitivity: number): void {
-    this._mouseSensitivity = Math.max(0.1, Math.min(5.0, sensitivity)); // Clamp between 0.1 and 5.0
-  }
-
-  public getMouseSensitivity(): number {
-    return this._mouseSensitivity;
-  }
-
-  // New mouse damping methods
-  public setMouseDamping(damping: number): void {
-    this._mouseDamping = Math.max(0, Math.min(0.99, damping)); // Clamp between 0 and 0.99
-  }
-
-  public getMouseDamping(): number {
-    return this._mouseDamping;
+  // Очистка
+  public dispose(): void {
+    this.pause();
+    if (this.renderer.gl.canvas.parentElement) {
+      this.renderer.gl.canvas.parentElement.removeChild(
+        this.renderer.gl.canvas,
+      );
+    }
   }
 }

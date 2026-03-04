@@ -43,16 +43,17 @@
 
     <!-- Main content -->
     <main>
-      
       <!-- Silk animated background (effect 1) - infinite animation -->
       <div class="fixed inset-0 z-0 pointer-events-none">
         <ClientOnly>
-          <UiSilkBackground
+          <!-- <UiSilkBackground
             :hue="220"
             :saturation="0.3"
             :brightness="0.55"
             :speed="0.5"
-          />
+          /> -->
+          
+        <UiSilkBackground :hue="300" :saturation="0" :brightness="1" :speed="1" />
         </ClientOnly>
       </div>
 

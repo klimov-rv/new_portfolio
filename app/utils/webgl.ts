@@ -1,4 +1,4 @@
-export function isWebGLSupported(): boolean {
+export default function isWebGLSupported(): boolean {
   try {
     const canvas = document.createElement('canvas');
     return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));

@@ -4,7 +4,7 @@ import shaderCode from 'shaders/silk.glsl?raw';
 
 interface Props extends ShaderControls {}
 
-const props = defineProps<Props>(); 
+const props = defineProps<Props>();
 </script>
 
 <template>

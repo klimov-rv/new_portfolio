@@ -5,12 +5,19 @@ const shaderState = useShaderState();
 
 const localSpeed = ref(0);
 const localHue = ref(0);
+const localSaturation = ref(0);
+const localBrightness = ref(0);
+
 watch(localSpeed, (val) => shaderState.setSpeed(val));
 watch(localHue, (val) => shaderState.setHue(val));
+watch(localSaturation, (val) => shaderState.setSaturation(val));
+watch(localBrightness, (val) => shaderState.setBrightness(val));
 
 onMounted(() => {
   localSpeed.value = shaderState.speed.value;
   localHue.value = shaderState.hue.value;
+  localSaturation.value = shaderState.saturation.value;
+  localBrightness.value = shaderState.brightness.value;
 });
 </script>
 
@@ -46,9 +53,31 @@ onMounted(() => {
           class="w-full"
         />
       </div>
+      <div class="mt-2">
+        <label>Интенсивность: {{ localSaturation }}</label>
+        <input
+          type="range"
+          v-model.number="localSaturation"
+          min="0"
+          max="5"
+          step="0.1"
+          class="w-full"
+        />
+      </div>
+      <div class="mt-2">
+        <label>Яркость: {{ localBrightness }}</label>
+        <input
+          type="range"
+          v-model.number="localBrightness"
+          min="0"
+          max="5"
+          step="0.1"
+          class="w-full"
+        />
+      </div>
 
       <div class="mt-2">
-        <input type="range" v-model.number="localSpeed" />
+        <label>Скорость: {{ localSpeed }}</label>
         <input
           type="range"
           v-model.number="localSpeed"

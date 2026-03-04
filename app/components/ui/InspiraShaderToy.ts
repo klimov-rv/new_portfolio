@@ -17,8 +17,8 @@ export interface MouseState {
 // HSV управление цветом (Hue-Saturation-Value)
 export interface HSVControls {
   hue: number; // 0-360 градусов
-  saturation: number; // 0-1 (интенсивность цвета)
-  brightness: number; // 0-1 (яркость)
+  saturation: number; // 0-5 (интенсивность цвета)
+  brightness: number; // 0-5 (яркость)
 }
 
 // Режим обработки мыши: 'click' = только при клике, 'hover' = постоянно следует
@@ -142,13 +142,6 @@ export class InspiraShaderToy {
       antialias: true,
       powerPreference: 'high-performance',
     });
-
-    if (
-      !this.renderer.gl ||
-      !(this.renderer.gl instanceof WebGL2RenderingContext)
-    ) {
-      throw new Error('WebGL 2 not supported');
-    }
 
     this.container.appendChild(this.renderer.gl.canvas);
 
@@ -445,10 +438,12 @@ export class InspiraShaderToy {
   // Скорость анимации (множитель для iTime)
   public setSpeed(val: number): void {
     this._speed = Math.max(0, val);
+
     if (!this.isPlaying && this.program && this.mesh) this.draw();
   }
 
   public getSpeed(): number {
+    console.log(' public this._speed;', this._speed);
     return this._speed;
   }
 
@@ -531,6 +526,14 @@ export class InspiraShaderToy {
     if (controls.mouseSensitivity !== undefined)
       this.setMouseSensitivity(controls.mouseSensitivity);
     if (controls.damping !== undefined) this.setMouseDamping(controls.damping);
+  }
+
+  public getState() {
+    return {
+      hue: this.hsv.hue,
+      speed: this._speed,
+      isPlaying: this.isPlaying,
+    };
   }
 
   // Очистка

@@ -22,8 +22,8 @@ export const useShaderState = () => {
   );
 
   const hue = useState<number>('shader-hue', () => 300);
-  const saturation = useState<number>('shader-saturation', () => 300);
-  const brightness = useState<number>('shader-brightness', () => 300);
+  const saturation = useState<number>('shader-saturation', () => 1);
+  const brightness = useState<number>('shader-brightness', () => 1);
   const speed = useState<number>('shader-speed', () => 1);
   const isPlaying = useState<boolean>('shader-playing', () => true);
 

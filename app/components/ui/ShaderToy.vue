@@ -1,65 +1,29 @@
 <script setup lang="ts">
 import type { ShaderProps } from '~/types/shader';
-import { InspiraShaderToy } from './InspiraShaderToy';
-import isWebGLSupported from '~/utils/webgl';
+import { useShaderToy } from '~/composables/useShaderToy';
 
 const props = defineProps<ShaderProps>();
 
 const containerRef = useTemplateRef('containerRef');
-let shader: InspiraShaderToy | undefined;
 
-// Размер фона для шума
-const bgSize = computed(() => `${(props.noise?.scale || 8) * 100}%`);
-
-onMounted(() => {
-  if (!containerRef.value || !isWebGLSupported()) return;
-
-  try {
-    shader = new InspiraShaderToy(containerRef.value, props.mouseMode);
-
-    // Единый вызов setShader
-    if (!shader.setShader({ source: props.shaderCode })) {
-      throw new Error('Shader compilation failed');
-    }
-
-    // Применяем все параметры одной функцией
-    updateShaderParams();
-    shader.play();
-  } catch (e) {
-    console.warn('ShaderToy error:', e);
-  }
+// Вся логика в композабле
+const { pause, play } = useShaderToy(containerRef, {
+  shaderCode: props.shaderCode,
+  mouseMode: props.mouseMode,
+  hue: props.hue,
+  saturation: props.saturation,
+  brightness: props.brightness,
+  speed: props.speed,
+  mouseSensitivity: props.mouseSensitivity,
+  damping: props.damping,
 });
 
-// Обновление всех параметров шейдера
-const updateShaderParams = () => {
-  if (!shader) return;
-
-  shader.setHSV({
-    hue: props.hue,
-    saturation: props.saturation,
-    brightness: props.brightness,
-  });
-
-  if (props.speed !== undefined) shader.setSpeed(props.speed);
-  if (props.mouseSensitivity !== undefined)
-    shader.setMouseSensitivity(props.mouseSensitivity);
-  if (props.damping !== undefined) shader.setMouseDamping(props.damping);
+// Размер для noise слоя
+const bgSize = computed(() => `${(props.noise?.scale || 8) * 100}%`);
+const pauseClick = () => {
+  console.log('sadasdsad');
+  pause();
 };
-
-// Один watcher на все пропсы
-watch(
-  [
-    () => props.hue,
-    () => props.saturation,
-    () => props.brightness,
-    () => props.speed,
-    () => props.mouseSensitivity,
-    () => props.damping,
-  ],
-  updateShaderParams,
-);
-
-onUnmounted(() => shader?.dispose());
 </script>
 
 <template>
@@ -74,6 +38,10 @@ onUnmounted(() => shader?.dispose());
         opacity: props.noise.opacity,
       }"
     />
+    <div style="position: absolute; z-index: 9999; top: 50%; right: 50%;">
+      <button @click="pauseClick">Пауза</button>
+      <button @click="play">Старт</button>
+    </div>
   </div>
 </template>
 

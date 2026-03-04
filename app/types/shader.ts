@@ -19,5 +19,10 @@ export interface NoiseConfig {
 export interface ShaderProps extends ShaderControls {
   shaderCode: string;
   noise?: NoiseConfig;
-  class?: any; // HTMLAttributes['class'] - оставляем any для простоты
+  class?: any;
 }
+
+// Опции для useShaderToy - те же что и пропсы, без class/noise
+export type UseShaderToyOptions = ShaderControls & {
+  shaderCode: string;
+};

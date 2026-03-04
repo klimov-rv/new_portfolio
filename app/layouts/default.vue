@@ -52,8 +52,13 @@
             :brightness="0.55"
             :speed="0.5"
           /> -->
-          
-        <UiSilkBackground :hue="300" :saturation="0" :brightness="1" :speed="1" />
+
+          <UiSilkBackground
+            :hue="300"
+            :saturation="0"
+            :brightness="1"
+            :speed="0.7"
+          />
         </ClientOnly>
       </div>
 
@@ -81,4 +86,5 @@
       <UiSmoothCursor /> 
     </ClientOnly> -->
   </div>
+  <ShaderControls />
 </template>

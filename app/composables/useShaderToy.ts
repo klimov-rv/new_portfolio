@@ -9,6 +9,7 @@ export function useShaderToy(
 ) {
   const shaderState = useShaderState();
   let shader: InspiraShaderToy | undefined;
+  let rafId: number;
 
   onMounted(() => {
     if (!containerRef.value || !isWebGLSupported()) return;
@@ -36,6 +37,8 @@ export function useShaderToy(
         setHue: (h) => shader?.setHue(h),
         setSaturation: (s) => shader?.setSaturation(s),
         setBrightness: (b) => shader?.setBrightness(b),
+        setMouseForce: (m) => shader?.setMouseForce(m),
+        setMouseSize: (m) => shader?.setMouseForce(m),
         setSpeed: (s) => shader?.setSpeed(s),
         getState: () => ({
           hue: shader?.getHSV().hue ?? 0,
@@ -49,6 +52,21 @@ export function useShaderToy(
       // Запускаем анимацию
       shader.play();
       shaderState.isPlaying.value = true;
+
+      const updateMouse = () => {
+        if (shader) {
+          const mouse = useGlobalMouse();
+          shader.updateMouseFromGlobal(
+            mouse.mouseX.value,
+            mouse.mouseY.value,
+            mouse.mouseClickX.value,
+            mouse.mouseClickY.value,
+            mouse.isMouseDown.value,
+          );
+        }
+        rafId = requestAnimationFrame(updateMouse);
+      };
+      rafId = requestAnimationFrame(updateMouse);
     } catch (e) {
       console.warn('ShaderToy error:', e);
     }
@@ -56,6 +74,7 @@ export function useShaderToy(
 
   onUnmounted(() => {
     shader?.dispose();
+    cancelAnimationFrame(rafId);
   });
 
   return {

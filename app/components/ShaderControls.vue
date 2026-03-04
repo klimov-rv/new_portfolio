@@ -8,10 +8,15 @@ const localHue = ref(0);
 const localSaturation = ref(0);
 const localBrightness = ref(0);
 
+const locMouseForce = ref(1.0);
+const locMouseSize = ref(0.25);
+
 watch(localSpeed, (val) => shaderState.setSpeed(val));
 watch(localHue, (val) => shaderState.setHue(val));
 watch(localSaturation, (val) => shaderState.setSaturation(val));
 watch(localBrightness, (val) => shaderState.setBrightness(val));
+watch(locMouseForce, (val) => shaderState.setMouseForce(val));
+watch(locMouseSize, (val) => shaderState.setMouseSize(val));
 
 onMounted(() => {
   localSpeed.value = shaderState.speed.value;
@@ -84,6 +89,30 @@ onMounted(() => {
           min="0"
           max="5"
           step="0.1"
+          class="w-full"
+        />
+      </div>
+
+      <div class="mt-2">
+        <label>Сила мыши: {{ locMouseForce }}</label>
+        <input
+          type="range"
+          v-model.number="locMouseForce"
+          min="0"
+          max="2"
+          step="0.1"
+          class="w-full"
+        />
+      </div>
+
+      <div class="mt-2">
+        <label>Радиус мыши: {{ locMouseSize }}</label>
+        <input
+          type="range"
+          v-model.number="locMouseSize"
+          min="0.1"
+          max="0.5"
+          step="0.01"
           class="w-full"
         />
       </div>

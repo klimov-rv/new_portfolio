@@ -1,5 +1,9 @@
 #define INVERT 1
 
+// Uniform'ы для эффекта мыши
+uniform float uMouseForce;     // Сила воздействия (0-2)
+uniform float uMouseSize;      // Радиус воздействия (0.1-0.5)
+
 float noise(vec2 p) {
     return smoothstep(-0.5, 0.9, sin((p.x - p.y) * 555.0) * sin(p.y * 1444.0)) - 0.4;
 }
@@ -32,8 +36,16 @@ void mainImage(out vec4 fragColor, vec2 fragCoord) {
     float t = iTime;
     uv.y += 0.03 * sin(8.0 * uv.x - t);
 
-    if (iMouse.z > 1.0)
-        uv += smoothstep(0.5, 0.0, distance(iMouse.xy / mr, uv)) * 0.08;
+    // Эффект "ряби" от мыши при клике
+    if (iMouse.z > 1.0) {
+        vec2 mouseUV = iMouse.xy / mr;
+        float dist = distance(mouseUV, uv);
+        float influence = smoothstep(uMouseSize, 0.0, dist) * uMouseForce;
+        
+        // Смещаем UV от центра мыши наружу
+        vec2 dir = normalize(uv - mouseUV);
+        uv += dir * influence * 0.1;
+    }
 
     float s = sqrt(silk(uv, t));
     float d = silkd(uv, t);
@@ -41,11 +53,13 @@ void mainImage(out vec4 fragColor, vec2 fragCoord) {
     vec3 c = vec3(s);
     c += 0.7 * vec3(1, 0.83, 0.6) * d;
     c *= 1.0 - max(0.0, 0.8 * d);
+    
 #if INVERT
     c = pow(c, 0.3 / vec3(0.52, 0.5, 0.4));
     c = 1.0 - c;
 #else
     c = pow(c, vec3(0.52, 0.5, 0.4));
 #endif 
+    
     fragColor = vec4(c, 1);
 }

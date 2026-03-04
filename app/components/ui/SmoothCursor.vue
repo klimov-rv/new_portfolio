@@ -8,7 +8,7 @@ const springConfig = {
   damping: 45,
   stiffness: 400,
   mass: 1,
-  restDelta: 0.001,
+  restDelta: 0.005,
 }
 
 const lastMousePos = ref<Position>({ x: 0, y: 0 });

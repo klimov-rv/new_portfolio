@@ -9,6 +9,8 @@ export interface ShaderControls extends HSVControls {
   mouseSensitivity?: number; // 0.1-5.0
   damping?: number; // 0-0.99
   mouseMode?: 'click' | 'hover';
+  mouseForce?: number; // 0-2, сила воздействия мыши
+  mouseSize?: number; // 0.1-0.5, радиус воздействия
 }
 
 export interface NoiseConfig {

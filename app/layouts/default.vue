@@ -25,14 +25,17 @@
               class="!text-sm !font-bold !font-mono !text-white"
             />
           </NuxtLink>
+          <span
+            class="font-mono uppercase tracking-widest text-xs text-white/60"
+          >
+            Portfolio
+          </span>
           <div class="flex items-center gap-6">
-            <span
-              class="font-mono uppercase tracking-widest text-xs text-white/60"
-              >Portfolio</span
-            >
             <a
-              href="mailto:contact@klimovproject.online"
+              href="https://klimov.mssg.me/"
               class="font-mono text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors duration-300"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               Связаться →
             </a>
@@ -44,26 +47,19 @@
     <!-- Main content -->
     <main>
       <!-- Silk animated background (effect 1) - infinite animation -->
-      <div class="fixed inset-0 z-0 pointer-events-none">
+      <div class="fixed z-10">
         <ClientOnly>
-          <!-- <UiSilkBackground
+          <UiSilkBackground
             :hue="220"
             :saturation="0.3"
             :brightness="0.55"
             :speed="0.5"
-          /> -->
-
-          <UiSilkBackground
-            :hue="300"
-            :saturation="0"
-            :brightness="1"
-            :speed="0.7"
           />
         </ClientOnly>
       </div>
 
       <!-- Dark overlay -->
-      <!-- <div class="fixed inset-0 z-0 bg-black/65 pointer-events-none" /> -->
+      <div class="fixed inset-0 z-0 bg-black/65 pointer-events-none" />
 
       <slot />
     </main>
@@ -82,9 +78,9 @@
     </footer>
 
     <!-- Smooth Cursor (effect 5) - desktop only -->
-    <!-- <ClientOnly>
-      <UiSmoothCursor /> 
-    </ClientOnly> -->
+    <ClientOnly>
+      <UiSmoothCursor />
+    </ClientOnly>
   </div>
   <ShaderControls />
 </template>

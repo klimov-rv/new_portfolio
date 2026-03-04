@@ -6,6 +6,8 @@ export interface ShaderController {
   setSpeed: (s: number) => void;
   setSaturation: (s: number) => void;
   setBrightness: (b: number) => void;
+  setMouseForce: (m: number) => void;
+  setMouseSize: (m: number) => void;
   getState: () => {
     hue: number;
     speed: number;
@@ -25,6 +27,10 @@ export const useShaderState = () => {
   const saturation = useState<number>('shader-saturation', () => 1);
   const brightness = useState<number>('shader-brightness', () => 1);
   const speed = useState<number>('shader-speed', () => 1);
+
+  const mouseForce = useState<number>('shader-mouse-force', () => 1);
+  const mouseSize = useState<number>('shader-mouse-size', () => 2);
+
   const isPlaying = useState<boolean>('shader-playing', () => true);
 
   const registerController = (ctrl: ShaderController) => {
@@ -69,6 +75,16 @@ export const useShaderState = () => {
     controller.value?.setBrightness(b);
   };
 
+  const setMouseForce = (m: number) => {
+    mouseForce.value = m;
+    controller.value?.setMouseForce(m);
+  };
+
+  const setMouseSize = (m: number) => {
+    mouseSize.value = m;
+    controller.value?.setMouseSize(m);
+  };
+
   return {
     hue,
     saturation,
@@ -83,5 +99,7 @@ export const useShaderState = () => {
     setSpeed,
     setSaturation,
     setBrightness,
+    setMouseForce,
+    setMouseSize,
   };
 };

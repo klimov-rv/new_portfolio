@@ -1,4 +1,5 @@
 import { Camera, Geometry, Mesh, Program, Renderer, Transform } from 'ogl';
+
 import type { ShaderControls } from '~/types/shader';
 
 // Конфиг для компиляции шейдера
@@ -167,6 +168,53 @@ export class InspiraShaderToy {
     this.setupResizeHandler();
   }
 
+  public updateMouseFromGlobal(
+    x: number,
+    y: number,
+    clickX?: number,
+    clickY?: number,
+    isDown?: boolean,
+  ) {
+    // Получаем canvas и его позицию
+    const canvas = this.renderer.gl.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio;
+
+    // Проверяем, находится ли мышь над canvas
+    const isOverCanvas =
+      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+
+    // Если мышь не над canvas, не обновляем позицию (или можно продолжать)
+    if (!isOverCanvas && this._mouseMode === 'hover') {
+      // Опционально: игнорируем или замораживаем последнюю позицию
+      return;
+    }
+
+    // Конвертируем глобальные координаты в координаты canvas
+    const canvasX = x - rect.left;
+    const canvasY = y - rect.top;
+
+    // Применяем те же преобразования, что и в getScaledMousePos
+    const scaledX = canvasX * dpr * this._mouseSensitivity;
+    const scaledY = (canvas.height - canvasY * dpr) * this._mouseSensitivity;
+
+    // Обновляем iMouse с damping
+    this.iMouse.x =
+      this.iMouse.x * this._mouseDamping + scaledX * (1 - this._mouseDamping);
+    this.iMouse.y =
+      this.iMouse.y * this._mouseDamping + scaledY * (1 - this._mouseDamping);
+
+    // Обновляем клик, если переданы координаты
+    if (clickX !== undefined && clickY !== undefined && isDown) {
+      const scaledClickX = (clickX - rect.left) * dpr * this._mouseSensitivity;
+      const scaledClickY =
+        (canvas.height - (clickY - rect.top) * dpr) * this._mouseSensitivity;
+
+      this.iMouse.clickX = scaledClickX;
+      this.iMouse.clickY = scaledClickY;
+    }
+  }
+
   // Обработка мыши и касаний (mouse, touchmove, touchstart)
   private setupMouseEvents(): void {
     const canvas = this.renderer.gl.canvas;
@@ -309,6 +357,8 @@ export class InspiraShaderToy {
             value: [this.hsv.hue, this.hsv.saturation, this.hsv.brightness],
           },
           iSpeed: { value: this._speed },
+          uMouseForce: { value: 1.0 },
+          uMouseSize: { value: 0.25 },
         },
       });
 
@@ -445,6 +495,21 @@ export class InspiraShaderToy {
   public getSpeed(): number {
     console.log(' public this._speed;', this._speed);
     return this._speed;
+  }
+
+  public setMouseForce(val: number) {
+    if (this.program) {
+      this.program.uniforms.uMouseForce.value = Math.max(0, Math.min(2, val));
+    }
+  }
+
+  public setMouseSize(val: number) {
+    if (this.program) {
+      this.program.uniforms.uMouseSize.value = Math.max(
+        0.1,
+        Math.min(0.5, val),
+      );
+    }
   }
 
   // Таймирование

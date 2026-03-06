@@ -32,18 +32,22 @@ float silkd(vec2 uv, float t) {
 void mainImage(out vec4 fragColor, vec2 fragCoord) {
     float mr = min(iResolution.x, iResolution.y);
     vec2 uv = fragCoord / mr;
+    vec2 baseUv = uv; // Базовые UV без анимации
 
     float t = iTime;
+    
+    // Базовая анимация (всегда применяется)
     uv.y += 0.03 * sin(8.0 * uv.x - t);
 
-    // Эффект "ряби" от мыши при клике
+    // Эффект мыши (только при клике)
     if (iMouse.z > 1.0) {
         vec2 mouseUV = iMouse.xy / mr;
-        float dist = distance(mouseUV, uv);
+        float dist = distance(mouseUV, baseUv);
         float influence = smoothstep(uMouseSize, 0.0, dist) * uMouseForce;
         
-        // Смещаем UV от центра мыши наружу
-        vec2 dir = normalize(uv - mouseUV);
+        vec2 dir = normalize(baseUv - mouseUV);
+        
+        // Применяем эффект поверх базовой анимации
         uv += dir * influence * 0.1;
     }
 

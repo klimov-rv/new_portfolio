@@ -50,10 +50,10 @@
       <div class="fixed z-10">
         <ClientOnly>
           <UiSilkBackground
-            :hue="220"
-            :saturation="0.3"
-            :brightness="0.55"
-            :speed="0.5"
+            :hue="50"
+            :saturation="0"
+            :brightness="0.7"
+            :speed="1.5"
           />
         </ClientOnly>
       </div>

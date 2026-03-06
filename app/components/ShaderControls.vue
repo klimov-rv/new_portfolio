@@ -11,19 +11,20 @@ const localBrightness = ref(0);
 const locMouseForce = ref(1.0);
 const locMouseSize = ref(0.25);
 
+onMounted(async () => {
+  await nextTick();
+  localSpeed.value = shaderState.speed.value;
+  localHue.value = shaderState.hue.value;
+  localSaturation.value = shaderState.saturation.value;
+  localBrightness.value = shaderState.brightness.value;
+});
+
 watch(localSpeed, (val) => shaderState.setSpeed(val));
 watch(localHue, (val) => shaderState.setHue(val));
 watch(localSaturation, (val) => shaderState.setSaturation(val));
 watch(localBrightness, (val) => shaderState.setBrightness(val));
 watch(locMouseForce, (val) => shaderState.setMouseForce(val));
 watch(locMouseSize, (val) => shaderState.setMouseSize(val));
-
-onMounted(() => {
-  localSpeed.value = shaderState.speed.value;
-  localHue.value = shaderState.hue.value;
-  localSaturation.value = shaderState.saturation.value;
-  localBrightness.value = shaderState.brightness.value;
-});
 </script>
 
 <template>

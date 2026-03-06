@@ -48,12 +48,14 @@ export class InspiraShaderToy {
   // Состояние шейдера (передается как uniforms)
   private iMouse: MouseState = { x: 0, y: 0, clickX: 0, clickY: 0 };
   private hsv: HSVControls = { hue: 0, saturation: 1, brightness: 1 };
+  private uEffectTime = { value: 0 };
+
   private _speed: number = 1; // Множитель скорости анимации
 
   // Управление мышью
   private _mouseMode: MouseMode = 'click';
   private _mouseSensitivity: number = 1.0;
-  private _mouseDamping: number = 0.9; // Инерция движения мыши (0-0.99)
+  private _mouseDamping: number = 0; // Инерция движения мыши (0-0.99)
 
   // Шейдер
   private shaderSource: string = '';
@@ -164,8 +166,22 @@ export class InspiraShaderToy {
   }
 
   private setup(): void {
-    this.setupMouseEvents();
     this.setupResizeHandler();
+  }
+
+  // Новый метод для обновления состояния клика
+  public setMouseState(isDown: boolean) {
+    console.log('INSPIRA_DOWN', isDown);
+    if (isDown) {
+      console.log(' 11111 this._mouseMode', this._mouseMode);
+      this.mouseMode = 'hover';
+      console.log('2222 this._mouseMode', this._mouseMode);
+    } else if (!isDown) {
+      console.log('3333 this._mouseMode', this._mouseMode);
+      this.mouseMode = 'click';
+      this.iMouse.x = 0;
+      this.iMouse.y = 0;
+    }
   }
 
   public updateMouseFromGlobal(
@@ -175,131 +191,43 @@ export class InspiraShaderToy {
     clickY?: number,
     isDown?: boolean,
   ) {
-    // Получаем canvas и его позицию
-    const canvas = this.renderer.gl.canvas;
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio;
-
-    // Проверяем, находится ли мышь над canvas
-    const isOverCanvas =
-      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-
-    // Если мышь не над canvas, не обновляем позицию (или можно продолжать)
-    if (!isOverCanvas && this._mouseMode === 'hover') {
-      // Опционально: игнорируем или замораживаем последнюю позицию
-      return;
-    }
-
-    // Конвертируем глобальные координаты в координаты canvas
-    const canvasX = x - rect.left;
-    const canvasY = y - rect.top;
-
-    // Применяем те же преобразования, что и в getScaledMousePos
-    const scaledX = canvasX * dpr * this._mouseSensitivity;
-    const scaledY = (canvas.height - canvasY * dpr) * this._mouseSensitivity;
-
-    // Обновляем iMouse с damping
-    this.iMouse.x =
-      this.iMouse.x * this._mouseDamping + scaledX * (1 - this._mouseDamping);
-    this.iMouse.y =
-      this.iMouse.y * this._mouseDamping + scaledY * (1 - this._mouseDamping);
-
-    // Обновляем клик, если переданы координаты
-    if (clickX !== undefined && clickY !== undefined && isDown) {
-      const scaledClickX = (clickX - rect.left) * dpr * this._mouseSensitivity;
-      const scaledClickY =
-        (canvas.height - (clickY - rect.top) * dpr) * this._mouseSensitivity;
-
-      this.iMouse.clickX = scaledClickX;
-      this.iMouse.clickY = scaledClickY;
-    }
-  }
-
-  // Обработка мыши и касаний (mouse, touchmove, touchstart)
-  private setupMouseEvents(): void {
+    console.log('Получаем canvas и его позицию');
     const canvas = this.renderer.gl.canvas;
     let isMouseDown = false;
 
     // Масштабируем координаты мыши на DPR и применяем чувствительность
-    const getScaledMousePos = (event: MouseEvent | Touch) => {
+    const getScaledMousePos = (x: number, y: number) => {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio;
-      const x = event.clientX - rect.left;
+      const new_x = x - rect.left;
       // Флипим Y, потому что в GLSL вверх это +Y, а в DOM это -Y
-      const y = event.clientY - rect.top;
+      const new_y = y - rect.top;
 
       return {
-        x: x * dpr * this._mouseSensitivity,
-        y: (canvas.height - y * dpr) * this._mouseSensitivity,
+        x: new_x * dpr,
+        y: canvas.height - new_y * dpr,
       };
     };
 
-    canvas.addEventListener('mousemove', (event: MouseEvent) => {
-      const { x: newX, y: newY } = getScaledMousePos(event);
+    const { x: newX, y: newY } = getScaledMousePos(x, y);
 
-      // Плавное движение мыши с инерцией (damping)
-      this.iMouse.x =
-        this.iMouse.x * this._mouseDamping + newX * (1 - this._mouseDamping);
-      this.iMouse.y =
-        this.iMouse.y * this._mouseDamping + newY * (1 - this._mouseDamping);
+    console.log('Плавное движение мыши с инерцией (damping)');
+    // Плавное движение мыши с инерцией (damping)
+    this.iMouse.x =
+      this.iMouse.x * this._mouseDamping + newX * (1 - this._mouseDamping);
+    this.iMouse.y =
+      this.iMouse.y * this._mouseDamping + newY * (1 - this._mouseDamping);
 
-      // В режиме 'hover' клик = текущая позиция мыши
-      if (this._mouseMode === 'hover' && !isMouseDown) {
-        this.iMouse.clickX = this.iMouse.x;
-        this.iMouse.clickY = this.iMouse.y;
-      } else if (isMouseDown) {
-        this.iMouse.clickX = newX;
-        this.iMouse.clickY = newY;
-      }
-    });
-
-    canvas.addEventListener('mousedown', (event: MouseEvent) => {
-      isMouseDown = true;
-      const { x: clickX, y: clickY } = getScaledMousePos(event);
-
-      // В режиме 'click' фиксируем позицию клика
-      if (this._mouseMode === 'click') {
-        this.iMouse.clickX = clickX;
-        this.iMouse.clickY = clickY;
-      }
-    });
-
-    canvas.addEventListener('mouseup', () => {
-      isMouseDown = false;
-    });
-
-    // Мобильная поддержка
-    canvas.addEventListener('touchmove', (event: TouchEvent) => {
-      event.preventDefault();
-      const touch = event.touches[0];
-      if (!touch) return;
-
-      const { x: newX, y: newY } = getScaledMousePos(touch);
-      this.iMouse.x = newX;
-      this.iMouse.y = newY;
-
-      if (this._mouseMode === 'hover') {
-        this.iMouse.clickX = newX;
-        this.iMouse.clickY = newY;
-      }
-    });
-
-    canvas.addEventListener('touchstart', (event: TouchEvent) => {
-      event.preventDefault();
-      isMouseDown = true;
-      const touch = event.touches[0];
-      if (!touch) return;
-      const { x: clickX, y: clickY } = getScaledMousePos(touch);
-
-      if (this._mouseMode === 'click') {
-        this.iMouse.clickX = clickX;
-        this.iMouse.clickY = clickY;
-      }
-    });
-
-    canvas.addEventListener('touchend', () => {
-      isMouseDown = false;
-    });
+    // В режиме 'hover' клик = текущая позиция мыши
+    if (this._mouseMode === 'hover' && !isMouseDown) {
+      console.log(' клик 111111111111 ++++');
+      this.iMouse.clickX = this.iMouse.x;
+      this.iMouse.clickY = this.iMouse.y;
+    } else {
+      console.log(' клик ---------------');
+      this.iMouse.clickX = newX;
+      this.iMouse.clickY = newY;
+    }
   }
 
   // Респонсивный шейдер - когда окно меняется, сколируем canvas
@@ -357,8 +285,8 @@ export class InspiraShaderToy {
             value: [this.hsv.hue, this.hsv.saturation, this.hsv.brightness],
           },
           iSpeed: { value: this._speed },
-          uMouseForce: { value: 1.0 },
-          uMouseSize: { value: 0.25 },
+          uMouseForce: { value: 0.3 },
+          uMouseSize: { value: 0.3 },
         },
       });
 
@@ -447,6 +375,12 @@ export class InspiraShaderToy {
     }
   };
 
+  public setEffectTime(val: number) {
+    if (this.program) {
+      this.program.uniforms.uEffectTime.value = Math.max(0, Math.min(1, val));
+    }
+  }
+
   // =========== PUBLIC INTERFACE ============
   // Загружаем и компилируем код шейдера
   public setShader(config: ShaderConfig): boolean {
@@ -493,7 +427,6 @@ export class InspiraShaderToy {
   }
 
   public getSpeed(): number {
-    console.log(' public this._speed;', this._speed);
     return this._speed;
   }
 
@@ -595,7 +528,7 @@ export class InspiraShaderToy {
 
   public getState() {
     return {
-      hue: this.hsv.hue,
+      ...this.hsv,
       speed: this._speed,
       isPlaying: this.isPlaying,
     };

@@ -28,3 +28,30 @@ export interface ShaderProps extends ShaderControls {
 export type UseShaderToyOptions = ShaderControls & {
   shaderCode: string;
 };
+
+// Стейт контроллер для шейдера InspiraShaderToy
+export interface ShaderController {
+  pause: () => void;
+  play: () => void;
+  restart: () => void;
+  setHue: (h: number) => void;
+  setSpeed: (s: number) => void;
+  setSaturation: (s: number) => void;
+  setBrightness: (b: number) => void;
+  setMouseForce: (m: number) => void;
+  setMouseSize: (m: number) => void;
+  updateMouseFromGlobal: (x: number, y: number) => void;
+  setMouseState: (isDown: boolean) => void;
+  getState: () => {
+    hue: number;
+    speed: number;
+    saturation: number;
+    brightness: number;
+    isPlaying: boolean;
+  };
+}
+
+export interface Position {
+  x: number;
+  y: number;
+}

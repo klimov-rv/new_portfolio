@@ -17,17 +17,18 @@ export function useShaderToy(
     try {
       shader = new InspiraShaderToy(containerRef.value, options.mouseMode);
 
+      console.log('onMounted options', options);
       if (!shader.setShader({ source: options.shaderCode })) {
         throw new Error('Shader compilation failed');
       }
 
       // Применяем начальные параметры (приоритет у переданных options)
       shader.setHSV({
-        hue: shaderState.hue.value ?? options.hue,
+        hue: options.hue ?? shaderState.hue.value,
         saturation: options.saturation ?? 1,
         brightness: options.brightness ?? 1,
       });
-      shader.setSpeed(shaderState.speed.value ?? options.speed);
+      shader.setSpeed(options.speed ?? shaderState.speed.value);
 
       // Регистрируем контроллер
       shaderState.registerController({
@@ -40,6 +41,8 @@ export function useShaderToy(
         setMouseForce: (m) => shader?.setMouseForce(m),
         setMouseSize: (m) => shader?.setMouseForce(m),
         setSpeed: (s) => shader?.setSpeed(s),
+        updateMouseFromGlobal: (x, y) => shader?.updateMouseFromGlobal(x, y),
+        setMouseState: (b) => shader?.setMouseState(b),
         getState: () => ({
           hue: shader?.getHSV().hue ?? 0,
           saturation: shader?.getHSV().saturation ?? 1,
@@ -52,21 +55,6 @@ export function useShaderToy(
       // Запускаем анимацию
       shader.play();
       shaderState.isPlaying.value = true;
-
-      const updateMouse = () => {
-        if (shader) {
-          const mouse = useGlobalMouse();
-          shader.updateMouseFromGlobal(
-            mouse.mouseX.value,
-            mouse.mouseY.value,
-            mouse.mouseClickX.value,
-            mouse.mouseClickY.value,
-            mouse.isMouseDown.value,
-          );
-        }
-        rafId = requestAnimationFrame(updateMouse);
-      };
-      rafId = requestAnimationFrame(updateMouse);
     } catch (e) {
       console.warn('ShaderToy error:', e);
     }
@@ -74,12 +62,10 @@ export function useShaderToy(
 
   onUnmounted(() => {
     shader?.dispose();
-    cancelAnimationFrame(rafId);
   });
 
   return {
     pause: () => shader?.pause(),
     play: () => shader?.play(),
-    getShader: () => shader,
   };
 }

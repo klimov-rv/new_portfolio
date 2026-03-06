@@ -48,7 +48,6 @@ export class InspiraShaderToy {
   // Состояние шейдера (передается как uniforms)
   private iMouse: MouseState = { x: 0, y: 0, clickX: 0, clickY: 0 };
   private hsv: HSVControls = { hue: 0, saturation: 1, brightness: 1 };
-  private uEffectTime = { value: 0 };
 
   private _speed: number = 1; // Множитель скорости анимации
 
@@ -56,6 +55,12 @@ export class InspiraShaderToy {
   private _mouseMode: MouseMode = 'click';
   private _mouseSensitivity: number = 1.0;
   private _mouseDamping: number = 0; // Инерция движения мыши (0-0.99)
+
+  private clickStrength = 0; // 0-1, сила затухающего эффекта
+  private decayStartStrength: number = 0;
+  private decayActive = false; // Флаг, что затухание активно
+  private decayStartTime = 0; // Время начала затухания
+  private decayDuration = 300; // Длительность затухания в мс
 
   // Шейдер
   private shaderSource: string = '';
@@ -171,31 +176,26 @@ export class InspiraShaderToy {
 
   // Новый метод для обновления состояния клика
   public setMouseState(isDown: boolean) {
-    console.log('INSPIRA_DOWN', isDown);
-    if (isDown) {
-      console.log(' 11111 this._mouseMode', this._mouseMode);
+    if (isDown && this.mouseMode != 'hover') {
       this.mouseMode = 'hover';
-      console.log('2222 this._mouseMode', this._mouseMode);
+      console.log('onClick');
+      const currPos = { x: this.iMouse.x, y: this.iMouse.y };
+      this.lastClickPos = currPos;
+
+      this.decayActive = false;
+      this.clickStrength = 1.0;
     } else if (!isDown) {
-      console.log('3333 this._mouseMode', this._mouseMode);
       this.mouseMode = 'click';
-      this.iMouse.x = 0;
-      this.iMouse.y = 0;
+      console.log('OffClick');
+      this.decayActive = true;
+      this.decayStartTime = Date.now();
+      this.decayStartStrength = this.clickStrength; // обычно 1.0
     }
   }
 
-  public updateMouseFromGlobal(
-    x: number,
-    y: number,
-    clickX?: number,
-    clickY?: number,
-    isDown?: boolean,
-  ) {
-    console.log('Получаем canvas и его позицию');
+  public updateMouseFromGlobal(x: number, y: number, isClick: boolean = false) {
     const canvas = this.renderer.gl.canvas;
-    let isMouseDown = false;
 
-    // Масштабируем координаты мыши на DPR и применяем чувствительность
     const getScaledMousePos = (x: number, y: number) => {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio;
@@ -211,22 +211,17 @@ export class InspiraShaderToy {
 
     const { x: newX, y: newY } = getScaledMousePos(x, y);
 
-    console.log('Плавное движение мыши с инерцией (damping)');
-    // Плавное движение мыши с инерцией (damping)
+    // Плавное движение с damping
     this.iMouse.x =
       this.iMouse.x * this._mouseDamping + newX * (1 - this._mouseDamping);
     this.iMouse.y =
       this.iMouse.y * this._mouseDamping + newY * (1 - this._mouseDamping);
 
-    // В режиме 'hover' клик = текущая позиция мыши
-    if (this._mouseMode === 'hover' && !isMouseDown) {
-      console.log(' клик 111111111111 ++++');
-      this.iMouse.clickX = this.iMouse.x;
-      this.iMouse.clickY = this.iMouse.y;
-    } else {
-      console.log(' клик ---------------');
+    if (isClick) {
       this.iMouse.clickX = newX;
       this.iMouse.clickY = newY;
+      this.clickStrength = 1.0;
+      this.lastClickPos = { x: newX, y: newY };
     }
   }
 
@@ -286,7 +281,7 @@ export class InspiraShaderToy {
           },
           iSpeed: { value: this._speed },
           uMouseForce: { value: 0.3 },
-          uMouseSize: { value: 0.3 },
+          uMouseSize: { value: 3.9 },
         },
       });
 
@@ -308,6 +303,23 @@ export class InspiraShaderToy {
     if (!this.program || !this.mesh) return;
 
     const now = this.isPlaying ? Date.now() : this.prevDrawTime;
+
+    // Обработка затухания
+    if (this.decayActive) {
+      const now = Date.now();
+      const elapsed = now - this.decayStartTime;
+
+      if (elapsed >= this.decayDuration) {
+        // Затухание завершено
+        this.decayActive = false;
+        this.clickStrength = 0;
+      } else {
+        // Плавное уменьшение силы (ease-out)
+        const progress = elapsed / this.decayDuration;
+        this.clickStrength =
+          this.decayStartStrength * (1 - Math.pow(progress, 1.5));
+      }
+    }
 
     // Ограничиваем FPS если нужна низкая частота
     if (this.isPlaying && this.targetFPS < 60) {
@@ -345,12 +357,15 @@ export class InspiraShaderToy {
       this.program.uniforms.iTimeDelta.value = iTimeDelta;
       this.program.uniforms.iFrameRate.value = this.targetFPS;
       this.program.uniforms.iFrame.value = this.iFrame;
+
+      // ✅ ЕДИНСТВЕННОЕ место установки iMouse
       this.program.uniforms.iMouse.value = [
         this.iMouse.x,
         this.iMouse.y,
-        this.iMouse.clickX,
-        this.iMouse.clickY,
+        this.decayActive ? 0 : this.mouseMode === 'hover' ? 1.0 : 0.0,
+        this.clickStrength,
       ];
+
       this.program.uniforms.iDate.value = iDate;
       this.program.uniforms.iHSV.value = [
         this.hsv.hue,
@@ -374,12 +389,6 @@ export class InspiraShaderToy {
       requestAnimationFrame(this.animate);
     }
   };
-
-  public setEffectTime(val: number) {
-    if (this.program) {
-      this.program.uniforms.uEffectTime.value = Math.max(0, Math.min(1, val));
-    }
-  }
 
   // =========== PUBLIC INTERFACE ============
   // Загружаем и компилируем код шейдера

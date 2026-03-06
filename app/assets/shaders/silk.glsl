@@ -3,6 +3,7 @@
 // Uniform'ы для эффекта мыши
 uniform float uMouseForce;     // Сила воздействия (0-2)
 uniform float uMouseSize;      // Радиус воздействия (0.1-0.5)
+uniform float uDecaySpeed;     // Скорость затухания (0-1)
 
 float noise(vec2 p) {
     return smoothstep(-0.5, 0.9, sin((p.x - p.y) * 555.0) * sin(p.y * 1444.0)) - 0.4;
@@ -32,22 +33,25 @@ float silkd(vec2 uv, float t) {
 void mainImage(out vec4 fragColor, vec2 fragCoord) {
     float mr = min(iResolution.x, iResolution.y);
     vec2 uv = fragCoord / mr;
-    vec2 baseUv = uv; // Базовые UV без анимации
 
     float t = iTime;
-    
-    // Базовая анимация (всегда применяется)
     uv.y += 0.03 * sin(8.0 * uv.x - t);
 
-    // Эффект мыши (только при клике)
-    if (iMouse.z > 1.0) {
+    // Эффект "ряби" от мыши
+    // iMouse.z > 0.0 = активный клик (полная сила)
+    // iMouse.w > 0.0 = затухание после отпускания
+    if (iMouse.z > 0.0 || iMouse.w > 0.0) {
         vec2 mouseUV = iMouse.xy / mr;
-        float dist = distance(mouseUV, baseUv);
-        float influence = smoothstep(uMouseSize, 0.0, dist) * uMouseForce;
+        float dist = distance(mouseUV, uv);
         
-        vec2 dir = normalize(baseUv - mouseUV);
+        // Определяем силу эффекта:
+        // - при активном клике (iMouse.z > 0) сила = uMouseForce
+        // - при затухании (iMouse.w) сила = iMouse.w * uMouseForce
+        float strength = iMouse.z > 0.0 ? uMouseForce : iMouse.w * uMouseForce;
         
-        // Применяем эффект поверх базовой анимации
+        float influence = smoothstep(uMouseSize, 0.0, dist) * strength;
+        
+        vec2 dir = normalize(uv - mouseUV);
         uv += dir * influence * 0.1;
     }
 

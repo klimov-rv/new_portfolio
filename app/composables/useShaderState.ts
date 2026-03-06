@@ -68,7 +68,7 @@ export const useShaderState = () => {
     controller.value?.setMouseSize(m);
   };
 
-  const updateMouse = (pos: Position) => {
+  const updateShaderMouse = (pos: Position) => {
     controller.value?.updateMouseFromGlobal(pos.x, pos.y);
   };
 
@@ -92,7 +92,7 @@ export const useShaderState = () => {
     setBrightness,
     setMouseForce,
     setMouseSize,
-    updateMouse,
+    updateShaderMouse,
     setMouseDown,
   };
 };

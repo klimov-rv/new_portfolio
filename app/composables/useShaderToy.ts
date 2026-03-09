@@ -9,7 +9,6 @@ export function useShaderToy(
 ) {
   const shaderState = useShaderState();
   let shader: InspiraShaderToy | undefined;
-  let rafId: number;
 
   onMounted(() => {
     if (!containerRef.value || !isWebGLSupported()) return;

@@ -4,7 +4,7 @@ import type { ShaderControls, ShaderProps } from '~/types/shader';
 import { useShaderToy } from '~/composables/useShaderToy';
 
 const props = defineProps<ShaderControls>();
-const shaderProps: ShaderProps = { ...props, shaderCode, mouseMode: 'hover' };
+const shaderProps: ShaderProps = { ...props, shaderCode, mouseMode: 'click' };
 const containerRef = useTemplateRef('containerRef');
 useShaderToy(containerRef, { ...shaderProps });
 </script>
@@ -20,6 +20,7 @@ useShaderToy(containerRef, { ...shaderProps });
   width: 100vw;
   overflow: hidden;
 }
+
 .shadertoy-container canvas {
   display: block;
   width: 100%;

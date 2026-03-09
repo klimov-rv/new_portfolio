@@ -53,15 +53,15 @@
             :hue="50"
             :saturation="0"
             :brightness="0.7"
-            :speed="1.5"
+            :speed="0.3"
           />
         </ClientOnly>
       </div>
 
       <!-- Dark overlay -->
-      <div class="fixed inset-0 z-0 bg-black/65 pointer-events-none" />
+      <!-- <div class="fixed inset-0 z-0 bg-black/65 pointer-events-none" />
 
-      <slot />
+      <slot /> -->
     </main>
 
     <!-- Footer -->

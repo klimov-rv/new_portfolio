@@ -1,10 +1,12 @@
 <script lang="ts" setup>
-import { useEventListener, useTimeoutFn } from '@vueuse/core';
+import { useEventListener } from '@vueuse/core';
 import { Motion, useSpring } from 'motion-v';
 import type { Position } from '~/types/shader';
+import { useSpeedController } from '~/composables/useSpeedController';
 
+const { currentSpeed, setTargetSpeed } = useSpeedController(1);
 const shaderState = useShaderState();
-
+const localSpeed = ref(0);
 const springConfig = {
   damping: 45,
   stiffness: 400,
@@ -13,21 +15,16 @@ const springConfig = {
 };
 
 const isMouseDown = ref(false);
-
-// Конфигурации пружин для разных режимов
-const springConfigNormal = springConfig;
-
 const lastMousePos = ref<Position>({ x: 0, y: 0 });
 const velocity = ref<Position>({ x: 0, y: 0 });
 const lastUpdateTime = ref(Date.now());
 const previousAngle = ref(0);
 const accumulatedRotation = ref(0);
 
-// Пружины - НЕ ПЕРЕНАЗНАЧАЕМ!
+// Пружины
 const cursorX = useSpring(0, springConfig);
 const cursorY = useSpring(0, springConfig);
-const defaultCursorX = ref(0);
-const defaultCursorY = ref(0);
+
 const rotation = useSpring(0, {
   ...springConfig,
   damping: 60,
@@ -39,7 +36,11 @@ const scale = useSpring(1, {
   stiffness: 500,
 });
 
-const isSpringMode = ref(true);
+// Дефолт координаты курсора
+const defaultCursorX = ref(0);
+const defaultCursorY = ref(0);
+
+const isSpringMode = ref(false);
 
 function setSpringMode(isSpring: boolean) {
   isSpringMode.value = isSpring;
@@ -60,6 +61,7 @@ function updateVelocity(pos: Position) {
 
 function onMouseMove(e: MouseEvent) {
   const pos: Position = { x: e.clientX, y: e.clientY };
+
   updateVelocity(pos);
 
   // Обновляем позицию курсора (либо плавного либо стандартного)
@@ -79,6 +81,7 @@ function onMouseMove(e: MouseEvent) {
   // Вращение и масштаб только при движении
   const speed = Math.sqrt(velocity.value.x ** 2 + velocity.value.y ** 2);
   if (speed > 0.1) {
+    setTargetSpeed(speed);
     const angle =
       Math.atan2(velocity.value.y, velocity.value.x) * (180 / Math.PI) + 90;
     let diff = angle - previousAngle.value;
@@ -90,25 +93,30 @@ function onMouseMove(e: MouseEvent) {
   }
 }
 
-function onMouseDown(e: Event) {
+function onMouseDown(e: MouseEvent) {
   isMouseDown.value = true;
   startDeformation(isMouseDown.value);
   cursorX.jump(e.clientX);
   cursorY.jump(e.clientY);
+  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
 }
 
-function onMouseUp(e: Event) {
+function onMouseUp(e: MouseEvent) {
   isMouseDown.value = false;
   startDeformation(isMouseDown.value);
   cursorX.jump(e.clientX);
   cursorY.jump(e.clientY);
+  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
 }
-function startDeformation(isAcrive) {
+
+function startDeformation(isAcrive: boolean) {
   scale.set(isAcrive ? 0.75 : 1);
   shaderState?.setMouseDown(isAcrive);
-  setSpringMode(!isAcrive);
+  // setSpringMode(!isAcrive);
 }
+
 let rafId = 0;
+
 function throttled(e: MouseEvent) {
   if (rafId) return;
   rafId = requestAnimationFrame(() => {
@@ -116,13 +124,24 @@ function throttled(e: MouseEvent) {
     rafId = 0;
   });
 }
+ 
 
-if (import.meta.client) {
-  document.body.style.cursor = 'none';
+// const changeSpeedGradually = () => { 
+//   setTargetSpeed(3);
+//   setTimeout(() => setTargetSpeed(5), 1000);
+//   setTimeout(() => setTargetSpeed(1), 2000);
+// };
+
+if (import.meta.client) { 
+  localSpeed.value = shaderState.speed.value;
+  //  changeSpeedGradually();
   useEventListener(window, 'mousemove', throttled);
   useEventListener(window, 'mousedown', onMouseDown);
   useEventListener(window, 'mouseup', onMouseUp);
 }
+
+watch(currentSpeed, (val) => (localSpeed.value = val));
+watch(localSpeed, (val) => shaderState.setSpeed(val));
 
 onUnmounted(() => {
   if (rafId) cancelAnimationFrame(rafId);
@@ -157,6 +176,7 @@ onUnmounted(() => {
     class="default-cursor"
     :style.attr="`left: ${defaultCursorX}px; top: ${defaultCursorY}px; transform: rotate(${rotation.current}deg) scale(${scale.current});`"
   >
+    <!-- currentSpeed: {{ currentSpeed }} -->
     <UiSvgDefaultCursor />
   </div>
 </template>

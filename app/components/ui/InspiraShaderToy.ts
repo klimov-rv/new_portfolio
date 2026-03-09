@@ -56,11 +56,27 @@ export class InspiraShaderToy {
   private _mouseSensitivity: number = 1.0;
   private _mouseDamping: number = 0; // Инерция движения мыши (0-0.99)
 
-  private clickStrength = 0; // 0-1, сила затухающего эффекта
+  private clickStrength: number = 0; // 0-1, сила затухающего эффекта
+
+  // Эффект "вмятины" для нажатия
+  private dentStartStrength: number = 0;
+  private dentActive: boolean = false;
+  private dentStartTime: number = 0;
+  private dentDuration: number = 300;
+
+  // Эффект "восстановления" после нажатия
   private decayStartStrength: number = 0;
-  private decayActive = false; // Флаг, что затухание активно
-  private decayStartTime = 0; // Время начала затухания
-  private decayDuration = 300; // Длительность затухания в мс
+  private decayActive: boolean = false; // Флаг, что затухание активно
+  private decayStartTime: number = 0; // Время начала затухания
+  private decayDuration: number = 500; // Длительность затухания в мс
+
+  private accumulatedTime: number = 0; // Время с учетом текущей скорости
+
+  // Для ещё более плавного перехода можно добавить интерполяцию
+  private targetSpeed: number = 1;
+  private speedTransitionActive: boolean = false;
+  private speedTransitionStart: number = 0;
+  private speedTransitionDuration: number = 300; // мс
 
   // Шейдер
   private shaderSource: string = '';
@@ -177,19 +193,19 @@ export class InspiraShaderToy {
   // Новый метод для обновления состояния клика
   public setMouseState(isDown: boolean) {
     if (isDown && this.mouseMode != 'hover') {
-      this.mouseMode = 'hover';
-      console.log('onClick');
-      const currPos = { x: this.iMouse.x, y: this.iMouse.y };
-      this.lastClickPos = currPos;
+      this.clickStrength = 1.0;
 
       this.decayActive = false;
-      this.clickStrength = 1.0;
+
+      this.dentActive = true;
+      this.dentStartTime = Date.now();
+      this.dentStartStrength = this.clickStrength;
     } else if (!isDown) {
-      this.mouseMode = 'click';
-      console.log('OffClick');
+      this.dentActive = false;
+
       this.decayActive = true;
       this.decayStartTime = Date.now();
-      this.decayStartStrength = this.clickStrength; // обычно 1.0
+      this.decayStartStrength = this.dentStartStrength;
     }
   }
 
@@ -221,11 +237,10 @@ export class InspiraShaderToy {
       this.iMouse.clickX = newX;
       this.iMouse.clickY = newY;
       this.clickStrength = 1.0;
-      this.lastClickPos = { x: newX, y: newY };
     }
   }
 
-  // Респонсивный шейдер - когда окно меняется, сколируем canvas
+  // Респонсив canvas
   private setupResizeHandler(): void {
     const resizeObserver = new ResizeObserver(() => {
       const width = this.container.clientWidth;
@@ -280,8 +295,8 @@ export class InspiraShaderToy {
             value: [this.hsv.hue, this.hsv.saturation, this.hsv.brightness],
           },
           iSpeed: { value: this._speed },
-          uMouseForce: { value: 0.3 },
-          uMouseSize: { value: 3.9 },
+          uMouseForce: { value: 0.15 },
+          uMouseSize: { value: 0.9 },
         },
       });
 
@@ -303,21 +318,57 @@ export class InspiraShaderToy {
     if (!this.program || !this.mesh) return;
 
     const now = this.isPlaying ? Date.now() : this.prevDrawTime;
+    // Плавный переход скорости
+    if (this.speedTransitionActive) {
+      const elapsed = now - this.speedTransitionStart;
 
-    // Обработка затухания
-    if (this.decayActive) {
-      const now = Date.now();
-      const elapsed = now - this.decayStartTime;
-
-      if (elapsed >= this.decayDuration) {
-        // Затухание завершено
-        this.decayActive = false;
-        this.clickStrength = 0;
+      if (elapsed >= this.speedTransitionDuration) {
+        this.speedTransitionActive = false;
+        this._speed = this.targetSpeed;
       } else {
-        // Плавное уменьшение силы (ease-out)
-        const progress = elapsed / this.decayDuration;
-        this.clickStrength =
-          this.decayStartStrength * (1 - Math.pow(progress, 1.5));
+        const progress = elapsed / this.speedTransitionDuration;
+        // ease-in-out для плавности
+        const eased =
+          progress < 0.5
+            ? 2 * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+        const oldSpeed = this._speed;
+        this._speed = oldSpeed + (this.targetSpeed - oldSpeed) * eased;
+
+        // Корректируем firstDrawTime для непрерывности
+        const currentPlaybackTime =
+          (now - this.firstDrawTime) * 0.001 * oldSpeed;
+        this.firstDrawTime = now - (currentPlaybackTime / this._speed) * 1000;
+      }
+    }
+
+    // Обработка вмятины и затухания
+    if (this.dentActive || this.decayActive) {
+      const now = Date.now();
+      const decayElapsed = now - this.decayStartTime;
+      const dentElapsed = now - this.dentStartTime;
+
+      if (this.decayActive) {
+        if (decayElapsed >= this.decayDuration) {
+          // Затухание завершено
+          this.decayActive = false;
+          this.clickStrength = 0;
+        } else {
+          // Плавное уменьшение силы (ease-out)
+          const progress = decayElapsed / this.decayDuration;
+          this.clickStrength =
+            this.decayStartStrength * (1 - Math.pow(progress, 1.5));
+        }
+      }
+
+      if (this.dentActive) {
+        if (dentElapsed >= this.dentDuration) {
+          this.dentActive = false;
+        } else {
+          const progress = dentElapsed / this.dentDuration;
+          this.clickStrength = this.dentStartStrength * Math.pow(progress, 1.5);
+        }
       }
     }
 
@@ -358,11 +409,11 @@ export class InspiraShaderToy {
       this.program.uniforms.iFrameRate.value = this.targetFPS;
       this.program.uniforms.iFrame.value = this.iFrame;
 
-      // ✅ ЕДИНСТВЕННОЕ место установки iMouse
+      // ✅ iMouse
       this.program.uniforms.iMouse.value = [
         this.iMouse.x,
         this.iMouse.y,
-        this.decayActive ? 0 : this.mouseMode === 'hover' ? 1.0 : 0.0,
+        this.decayActive || this.dentActive ? 0 : 0.0,
         this.clickStrength,
       ];
 
@@ -374,7 +425,7 @@ export class InspiraShaderToy {
       ];
       this.program.uniforms.iSpeed.value = this._speed;
 
-      // Рендер!
+      // Рендер
       this.renderer.render({ scene: this.mesh, camera: this.camera });
     }
 
@@ -430,10 +481,42 @@ export class InspiraShaderToy {
 
   // Скорость анимации (множитель для iTime)
   public setSpeed(val: number): void {
-    this._speed = Math.max(0, val);
+    // Защита от отрицательных значений
+    val = Math.max(0, val);
 
-    if (!this.isPlaying && this.program && this.mesh) this.draw();
+    // Если скорость не меняется - ничего не делаем
+    if (Math.abs(val - this._speed) < 0.001) return;
+
+    // Если анимация не играет - просто меняем скорость
+    if (!this.isPlaying || !this.program || !this.mesh) {
+      this._speed = val;
+      return;
+    }
+
+    // Сохраняем текущее время анимации
+    const now = Date.now();
+    const currentTime = (now - this.firstDrawTime) * 0.001; // время без множителя
+    const currentPlaybackTime = currentTime * this._speed; // время с текущим множителем
+
+    // Пересчитываем firstDrawTime для новой скорости
+    // Чтобы currentPlaybackTime остался тем же
+    this.firstDrawTime = now - (currentPlaybackTime / val) * 1000;
+
+    // Обновляем скорость
+    this._speed = val;
+
+    // Опционально: сразу отрисовываем кадр с новыми параметрами
+    if (this.isPlaying) {
+      this.draw();
+    }
   }
+
+  // public setSpeedSmooth(val: number, duration: number = 300): void {
+  //   this.targetSpeed = Math.max(0, val);
+  //   this.speedTransitionActive = true;
+  //   this.speedTransitionStart = Date.now();
+  //   this.speedTransitionDuration = duration;
+  // }
 
   public getSpeed(): number {
     return this._speed;

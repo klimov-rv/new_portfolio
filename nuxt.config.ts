@@ -11,8 +11,6 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
   },
   alias: {
-    '@': fileURLToPath(new URL('./', import.meta.url)),
-    '~': fileURLToPath(new URL('./app', import.meta.url)),
     components: fileURLToPath(new URL('./app/components', import.meta.url)),
     shaders: fileURLToPath(new URL('./app/assets/shaders', import.meta.url)),
   },

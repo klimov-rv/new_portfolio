@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="min-h-screen bg-black text-white">
+  <div class="min-h-screen bg-black text-white overflow-hidden">
     <!-- Liquid Glass Navigation (effect 3) -->
     <header
       class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl"
@@ -47,7 +47,7 @@
     <!-- Main content -->
     <main>
       <!-- Silk animated background (effect 1) - infinite animation -->
-      <div class="fixed z-10">
+      <div class="fixed z-0">
         <ClientOnly>
           <UiSilkBackground
             :hue="50"
@@ -58,10 +58,10 @@
         </ClientOnly>
       </div>
 
-      <!-- Dark overlay -->
-      <!-- <div class="fixed inset-0 z-0 bg-black/65 pointer-events-none" />
+      <!-- Dark overlay bg-black/35 -->
+      <div class="filter-overlay fixed inset-0 z-0 pointer-events-none" />
 
-      <slot /> -->
+      <slot />
     </main>
 
     <!-- Footer -->
@@ -84,3 +84,31 @@
   </div>
   <ShaderControls />
 </template>
+<style>
+.overflow-hidden {
+  overflow: hidden;
+  position: relative;
+}
+.filter-overlay {
+  /* background: linear-gradient(45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab) 0 0 /
+    500% 1500%; */
+  background: black;
+  animation: 35s infinite gradientBG;
+  opacity: 0.7;
+  filter: contrast(0.1) brightness(0.1);
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0%;
+  }
+
+  50% {
+    background-position: 100%;
+  }
+
+  to {
+    background-position: 0%;
+  }
+}
+</style>

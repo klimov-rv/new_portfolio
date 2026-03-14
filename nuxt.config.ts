@@ -4,8 +4,7 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
   compatibilityDate: '2025-01-01',
   devtools: { enabled: true },
-  ssr: false, // SPA mode - avoids WebGL/OGL SSR issues
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@nuxt/image'],
   css: ['~/assets/css/main.css'],
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },

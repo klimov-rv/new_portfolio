@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import gsap from 'gsap';
-import { useRoute } from 'nuxt/app';
+import { useEventListener } from '@vueuse/core';
+import { useSpeedController } from '~/composables/useSpeedController';
+import type { Position } from '~/types/shader';
 
 interface Props {
   enlargeTargetSelector?: string; // селектор элементов, увеличивающих курсор
@@ -13,6 +15,9 @@ const props = withDefaults(defineProps<Props>(), {
   fullCursorSize: 40,
   observerRoot: 'body', // можно передать конкретный контейнер, например '#main-content'
 });
+
+// Фильтр под курсором включён
+const showFilter = ref(true);
 
 // Refs для элементов курсора
 const cursorWrapper = ref<HTMLElement | null>(null);
@@ -28,7 +33,6 @@ const activeElements = new Set<HTMLElement>();
 
 // Tween'ы GSAP
 let enlargeCursorTween: gsap.core.Tween | null = null;
-let mainNavHoverTween: gsap.core.Tween | null = null;
 let bumpCursorTween: gsap.core.Tween | null = null;
 
 const easing = gsap.parseEase('back.inOut(1.7)');
@@ -69,9 +73,43 @@ function refreshAllTargets() {
 const handleMouseEnterEnlarge = () => enlargeCursorTween?.play();
 const handleMouseLeaveEnlarge = () => enlargeCursorTween?.reverse();
 
+const shaderState = useShaderState();
+const { currentSpeed, setTargetSpeed } = useSpeedController(1);
+const isMouseDown = ref(false);
+const localSpeed = ref(0);
+const lastMousePos = ref<Position>({ x: 0, y: 0 });
+const velocity = ref<Position>({ x: 0, y: 0 });
+const lastUpdateTime = ref(Date.now());
+
+function updateVelocity(pos: Position) {
+  const now = Date.now();
+  const dt = now - lastUpdateTime.value;
+  if (dt > 0) {
+    velocity.value = {
+      x: (pos.x - lastMousePos.value.x) / dt,
+      y: (pos.y - lastMousePos.value.y) / dt,
+    };
+  }
+  lastUpdateTime.value = now;
+  lastMousePos.value = pos;
+}
+
 const onMouseMove = (e: MouseEvent) => {
+  const pos: Position = { x: e.clientX, y: e.clientY };
+
+  updateVelocity(pos);
+  // Обновляем шейдер с текущим состоянием клика
+  if (isMouseDown.value) {
+    shaderState?.updateShaderMouse(pos);
+  }
   clientX.value = e.clientX;
   clientY.value = e.clientY;
+
+  // Ускорение анимации фона при движении
+  const speed = Math.sqrt(velocity.value.x ** 2 + velocity.value.y ** 2);
+  if (speed > 0.1) {
+    setTargetSpeed(speed);
+  }
 };
 
 const updateCursorPosition = () => {
@@ -80,6 +118,22 @@ const updateCursorPosition = () => {
   }
   requestAnimationFrame(updateCursorPosition);
 };
+
+function onMouseDown(e: MouseEvent) {
+  isMouseDown.value = true;
+  startDeformation(isMouseDown.value);
+  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
+}
+
+function onMouseUp(e: MouseEvent) {
+  isMouseDown.value = false;
+  startDeformation(isMouseDown.value);
+  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
+}
+
+function startDeformation(isAcrive: boolean) {
+  shaderState?.setMouseDown(isAcrive);
+}
 
 const bumpCursor = () => bumpCursorTween?.play();
 
@@ -90,6 +144,7 @@ onMounted(() => {
   const wrapperEl = cursorWrapper.value;
   const innerEl = innerCursor.value;
   const outerEl = outerCursor.value;
+  localSpeed.value = shaderState.speed.value;
 
   if (!wrapperEl || !innerEl || !outerEl) return;
 
@@ -97,16 +152,6 @@ onMounted(() => {
   enlargeCursorTween = gsap.to(outerEl, {
     duration: 0.3,
     backgroundColor: 'transparent',
-    width: props.fullCursorSize,
-    height: props.fullCursorSize,
-    ease: easing,
-    paused: true,
-  });
-
-  mainNavHoverTween = gsap.to(outerEl, {
-    duration: 0.3,
-    backgroundColor: '#ffffff',
-    opacity: 0.3,
     width: props.fullCursorSize,
     height: props.fullCursorSize,
     ease: easing,
@@ -126,8 +171,11 @@ onMounted(() => {
     },
   });
 
-  // Глобальный слушатель мыши
-  document.addEventListener('mousemove', onMouseMove);
+  // Слушатели мыши
+  useEventListener(window, 'mousemove', onMouseMove);
+  useEventListener(window, 'mousedown', onMouseDown);
+  useEventListener(window, 'mouseup', onMouseUp);
+
   requestAnimationFrame(updateCursorPosition);
 
   // Получаем корневой элемент для наблюдения
@@ -203,6 +251,9 @@ onMounted(() => {
   });
 });
 
+watch(currentSpeed, (val) => (localSpeed.value = val));
+watch(localSpeed, (val) => shaderState.setSpeed(val));
+
 onUnmounted(() => {
   // Останавливаем observer
   observer?.disconnect();
@@ -219,7 +270,6 @@ onUnmounted(() => {
 
   // Останавливаем анимации
   enlargeCursorTween?.kill();
-  mainNavHoverTween?.kill();
   bumpCursorTween?.kill();
 });
 
@@ -242,6 +292,17 @@ watch(
   <div ref="cursorWrapper" class="cursor-wrapper">
     <div ref="innerCursor" class="custom-cursor custom-cursor__inner"></div>
     <div ref="outerCursor" class="custom-cursor custom-cursor__outer"></div>
+    <UiCursorLiquidGlass
+      v-if="showFilter"
+      :size="40"
+      :displace="2.5"
+      :blur="5"
+      :border="0.1"
+      :lightness="60"
+      :alpha="0.7"
+      :frost="0.1"
+      class="cursor-filter"
+    />
   </div>
   <div class="default-cursor-tooltip">
     VIEW
@@ -251,7 +312,6 @@ watch(
 <style lang="scss">
 @media (any-pointer: fine) {
   .cursor-wrapper {
-    mix-blend-mode: difference;
     position: fixed;
     top: 0;
     left: 0;
@@ -275,15 +335,29 @@ watch(
     height: 6px;
     background-color: #fff;
     transform: translate(-50%, -50%);
+    z-index: 2;
   }
 
   .custom-cursor__outer {
-    width: 1px;
-    height: 1px;
-    border: 2px solid #fff;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
     background-color: transparent;
     transform: translate(-50%, -50%);
-    transition: background-color 0.3s, opacity 0.3s;
+    transition: background-color 0.3s, opacity 0.3s, transform 0.2s;
+    z-index: 1;
+  }
+
+  .cursor-filter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
   }
 
   .cursor-wrapper.has-blend-mode {
@@ -298,7 +372,6 @@ watch(
     opacity: 0.5;
   }
 
-  // Стили для tooltip (оставлены из исходного шаблона)
   .default-cursor-tooltip {
     display: none;
   }

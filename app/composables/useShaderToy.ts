@@ -16,7 +16,6 @@ export function useShaderToy(
     try {
       shader = new InspiraShaderToy(containerRef.value, options.mouseMode);
 
-      console.log('onMounted options', options);
       if (!shader.setShader({ source: options.shaderCode })) {
         throw new Error('Shader compilation failed');
       }

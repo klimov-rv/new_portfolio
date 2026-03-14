@@ -12,7 +12,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   enlargeTargetSelector: '.card-3d',
-  fullCursorSize: 40,
+  fullCursorSize: 110,
   observerRoot: 'body', // можно передать конкретный контейнер, например '#main-content'
 });
 
@@ -34,6 +34,7 @@ const activeElements = new Set<HTMLElement>();
 // Tween'ы GSAP
 let enlargeCursorTween: gsap.core.Tween | null = null;
 let bumpCursorTween: gsap.core.Tween | null = null;
+const liquidSize = ref(0);
 
 const easing = gsap.parseEase('back.inOut(1.7)');
 
@@ -156,8 +157,14 @@ onMounted(() => {
     height: props.fullCursorSize,
     ease: easing,
     paused: true,
-  });
+    onUpdate() {
+      if (!outerEl) return;
+      const currentWidth =
+        parseFloat(outerEl.style.width) || props.fullCursorSize;
 
+      liquidSize.value = currentWidth;
+    },
+  });
   bumpCursorTween = gsap.to(innerEl, {
     duration: 0.1,
     scale: 0.7,
@@ -287,21 +294,15 @@ watch(
   },
 );
 </script>
-
 <template>
   <div ref="cursorWrapper" class="cursor-wrapper">
     <div ref="innerCursor" class="custom-cursor custom-cursor__inner"></div>
     <div ref="outerCursor" class="custom-cursor custom-cursor__outer"></div>
     <UiCursorLiquidGlass
       v-if="showFilter"
-      :size="40"
-      :displace="2.5"
-      :blur="5"
-      :border="0.1"
-      :lightness="60"
-      :alpha="0.7"
-      :frost="0.1"
-      class="cursor-filter"
+      :size="liquidSize"
+      :displace="0.1"
+      :frost="1.3"
     />
   </div>
   <div class="default-cursor-tooltip">
@@ -339,25 +340,13 @@ watch(
   }
 
   .custom-cursor__outer {
-    width: 40px;
-    height: 40px;
-    border: 2px solid rgba(255, 255, 255, 0.8);
+    width: 1px;
+    height: 1px;
+    border: 0px solid;
     background-color: transparent;
     transform: translate(-50%, -50%);
     transition: background-color 0.3s, opacity 0.3s, transform 0.2s;
     z-index: 1;
-  }
-
-  .cursor-filter {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 40px;
-    height: 40px;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
   }
 
   .cursor-wrapper.has-blend-mode {
@@ -366,10 +355,6 @@ watch(
 
   .cursor-wrapper.is-outside {
     opacity: 0;
-  }
-
-  .custom-cursor__inner.is-closing {
-    opacity: 0.5;
   }
 
   .default-cursor-tooltip {

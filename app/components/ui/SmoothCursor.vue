@@ -12,9 +12,17 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   enlargeTargetSelector: '.card-3d',
-  fullCursorSize: 110,
+  fullCursorSize: 28,
   observerRoot: 'body', // можно передать конкретный контейнер, например '#main-content'
 });
+
+const lineProps = {
+  totalLines: 130,
+  ease: 0.97,
+  lineColor: '#fff',
+  lineWidth: 5,
+  startOffset: 15,
+};
 
 // Фильтр под курсором включён
 const showFilter = ref(true);
@@ -34,24 +42,139 @@ const activeElements = new Set<HTMLElement>();
 // Tween'ы GSAP
 let enlargeCursorTween: gsap.core.Tween | null = null;
 let bumpCursorTween: gsap.core.Tween | null = null;
-const liquidSize = ref(0);
 
-const easing = gsap.parseEase('back.inOut(1.7)');
+// Данные одной линии
+interface LineData {
+  element: SVGLineElement; // DOM-элемент <line>
+  x: number; // текущая координата начала линии (x1)
+  y: number; // текущая координата начала линии (y1)
+}
+
+const easing = gsap.parseEase('back.inOut(1.7)'); // можем использовать?
+const {
+  totalLines = 100,
+  ease = 0.75,
+  lineColor = '#3f51b5',
+  lineWidth = 2,
+  startOffset = 15,
+} = lineProps;
+
+// Один общий объект мыши (реактивный, но не заменяемый)
+const mousePos = reactive<Position>({ x: 0, y: 0 });
+
+// SVG-элемент, куда будем рисовать
+const cursorTail = ref<SVGElement | null>(null);
+const svgNS = 'http://www.w3.org/2000/svg';
+
+// Массив всех линий
+const lines: LineData[] = [];
+
+// Одна анимация, которая будет тикать и вызывать updateLines
+let animation: gsap.core.Tween | null = null;
+
+/**
+ * Обновление позиций всех линий – вызывается каждый кадр анимации
+ */
+function updateLines() {
+  // Если линий нет, ничего не делаем
+  if (lines.length === 0) return;
+
+  // Первая линия (индекс 0) следует за мышью
+  const first = lines[0];
+  if (first) {
+    first.x += (mousePos.x - first.x) * ease;
+    first.y += (mousePos.y - first.y) * ease;
+
+    first.element.setAttribute('x1', first.x.toString());
+    first.element.setAttribute('y1', first.y.toString());
+    first.element.setAttribute('x2', mousePos.x.toString());
+    first.element.setAttribute('y2', mousePos.y.toString());
+  }
+
+  // Остальные линии следуют за предыдущей
+  for (let i = 1; i < lines.length; i++) {
+    const prev = lines[i - 1];
+    const curr = lines[i];
+    if (prev && curr) {
+      curr.x += (prev.x - curr.x) * ease;
+      curr.y += (prev.y - curr.y) * ease;
+
+      curr.element.setAttribute('x1', curr.x.toString());
+      curr.element.setAttribute('y1', curr.y.toString());
+      curr.element.setAttribute('x2', prev.x.toString());
+      curr.element.setAttribute('y2', prev.y.toString());
+    }
+  }
+}
+
+/**
+ * Создание всех линий и запуск анимации
+ */
+function initTail() {
+  if (!cursorTail.value) return;
+
+  // Очистка предыдущих линий
+  cursorTail.value.innerHTML = '';
+  lines.length = 0;
+
+  // Создаём линии в цикле
+  for (let i = 0; i < totalLines; i++) {
+    const line = document.createElementNS(svgNS, 'line');
+    cursorTail.value.appendChild(line);
+
+    // Начальное смещение
+    const x = -startOffset;
+    const y = -startOffset;
+
+    // Начальные атрибуты
+    line.setAttribute('x1', x.toString());
+    line.setAttribute('y1', y.toString());
+    line.setAttribute('x2', mousePos.x.toString());
+    line.setAttribute('y2', mousePos.y.toString());
+
+    // Стилизация
+    line.setAttribute('stroke', lineColor);
+    line.setAttribute('stroke-width', lineWidth.toString());
+    line.setAttribute('stroke-linecap', 'round');
+
+    // Прозрачность зависит от индекса (первые ярче, последние прозрачнее)
+    const opacity = (totalLines - i) / totalLines;
+    line.setAttribute('opacity', opacity.toString());
+
+    // Сохраняем данные линии
+    lines.push({ element: line, x, y });
+  }
+
+  // Запускаем анимацию (пустой объект, только onUpdate)
+  if (animation) animation.kill();
+  animation = gsap.to(
+    {},
+    {
+      duration: 2500,
+      repeat: -1,
+      ease: easing,
+      onUpdate: updateLines,
+    },
+  );
+}
+
+const liquidGlassSize = ref(0);
 
 // Наблюдатель за DOM
 let observer: MutationObserver | null = null;
+
 // --- Вспомогательные функции для управления слушателями ---
 function addListenersToElement(el: HTMLElement) {
   if (activeElements.has(el)) return;
-  el.addEventListener('mouseenter', handleMouseEnterEnlarge);
-  el.addEventListener('mouseleave', handleMouseLeaveEnlarge);
+  useEventListener(el, 'mouseenter', handleMouseEnterEnlarge);
+  useEventListener(el, 'mouseleave', handleMouseLeaveEnlarge);
   activeElements.add(el);
 }
 
 function removeListenersFromElement(el: HTMLElement) {
   if (!activeElements.has(el)) return;
-  el.removeEventListener('mouseenter', handleMouseEnterEnlarge);
-  el.removeEventListener('mouseleave', handleMouseLeaveEnlarge);
+  useEventListener(el, 'mouseenter', handleMouseEnterEnlarge);
+  useEventListener(el, 'mouseleave', handleMouseLeaveEnlarge);
   activeElements.delete(el);
 }
 
@@ -71,8 +194,14 @@ function refreshAllTargets() {
   elements.forEach((el) => addListenersToElement(el));
 }
 // При наведении на цель enlarge
-const handleMouseEnterEnlarge = () => enlargeCursorTween?.play();
-const handleMouseLeaveEnlarge = () => enlargeCursorTween?.reverse();
+const handleMouseEnterEnlarge = () => {
+  enlargeCursorTween?.play();
+  bumpCursorTween?.play();
+};
+const handleMouseLeaveEnlarge = () => {
+  enlargeCursorTween?.reverse();
+  bumpCursorTween?.reverse();
+};
 
 const shaderState = useShaderState();
 const { currentSpeed, setTargetSpeed } = useSpeedController(1);
@@ -97,6 +226,9 @@ function updateVelocity(pos: Position) {
 
 const onMouseMove = (e: MouseEvent) => {
   const pos: Position = { x: e.clientX, y: e.clientY };
+
+  mousePos.x = e.clientX;
+  mousePos.y = e.clientY;
 
   updateVelocity(pos);
   // Обновляем шейдер с текущим состоянием клика
@@ -147,26 +279,31 @@ onMounted(() => {
   const outerEl = outerCursor.value;
   localSpeed.value = shaderState.speed.value;
 
-  if (!wrapperEl || !innerEl || !outerEl) return;
+  if (!wrapperEl || !innerEl || !outerEl || !cursorTail) return;
+
+  // Ставим мышь в центр для красивого старта
+  mousePos.x = window.innerWidth / 2;
+  mousePos.y = window.innerHeight / 2;
+
+  initTail();
 
   // Создание анимаций
   enlargeCursorTween = gsap.to(outerEl, {
-    duration: 0.3,
-    backgroundColor: 'transparent',
+    duration: 0.5,
     width: props.fullCursorSize,
     height: props.fullCursorSize,
     ease: easing,
     paused: true,
     onUpdate() {
       if (!outerEl) return;
-      const currentWidth =
-        parseFloat(outerEl.style.width) || props.fullCursorSize;
+      const currentWidth = parseFloat(outerEl.style.width);
 
-      liquidSize.value = currentWidth;
+      liquidGlassSize.value = currentWidth;
     },
   });
+
   bumpCursorTween = gsap.to(innerEl, {
-    duration: 0.1,
+    duration: 0.3,
     scale: 0.7,
     paused: true,
     onComplete: () => {
@@ -182,8 +319,6 @@ onMounted(() => {
   useEventListener(window, 'mousemove', onMouseMove);
   useEventListener(window, 'mousedown', onMouseDown);
   useEventListener(window, 'mouseup', onMouseUp);
-
-  requestAnimationFrame(updateCursorPosition);
 
   // Получаем корневой элемент для наблюдения
   const rootElement =
@@ -265,19 +400,17 @@ onUnmounted(() => {
   // Останавливаем observer
   observer?.disconnect();
 
-  // Удаляем глобальный слушатель мыши
-  document.removeEventListener('mousemove', onMouseMove);
-
-  // Удаляем все слушатели с элементов
-  activeElements.forEach((el) => {
-    el.removeEventListener('mouseenter', handleMouseEnterEnlarge);
-    el.removeEventListener('mouseleave', handleMouseLeaveEnlarge);
-  });
-  activeElements.clear();
-
   // Останавливаем анимации
   enlargeCursorTween?.kill();
   bumpCursorTween?.kill();
+
+  // Останавливаем все анимации
+  if (animation) animation.kill();
+
+  // Очищаем SVG
+  if (cursorTail.value) {
+    cursorTail.value.innerHTML = '';
+  }
 });
 
 // Дополнительно: если нужно при смене роута (например, когда Nuxt полностью перерисовывает страницу без мутаций),
@@ -298,20 +431,25 @@ watch(
   <div ref="cursorWrapper" class="cursor-wrapper">
     <div ref="innerCursor" class="custom-cursor custom-cursor__inner"></div>
     <div ref="outerCursor" class="custom-cursor custom-cursor__outer"></div>
-    <UiCursorLiquidGlass
-      v-if="showFilter"
-      :size="liquidSize"
-      :displace="0.1"
-      :frost="1.3"
-    />
+    <UiCursorLiquidGlass v-if="showFilter" :size="liquidGlassSize" />
   </div>
   <div class="default-cursor-tooltip">
     VIEW
   </div>
+  <svg ref="cursorTail" class="cursor-tail"></svg>
 </template>
 
 <style lang="scss">
 @media (any-pointer: fine) {
+  .cursor-tail {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+  }
   .cursor-wrapper {
     position: fixed;
     top: 0;
@@ -342,7 +480,7 @@ watch(
   .custom-cursor__outer {
     width: 1px;
     height: 1px;
-    border: 0px solid;
+    border: 2px solid white;
     background-color: transparent;
     transform: translate(-50%, -50%);
     transition: background-color 0.3s, opacity 0.3s, transform 0.2s;

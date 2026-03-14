@@ -18,19 +18,19 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 5,
-  radius: 1,
+  radius: 50,
   blend: 'difference',
   border: 1,
   lightness: 30,
   xChannel: 'R',
   yChannel: 'B',
   blur: 1,
-  alpha: 50.33,
+  alpha: 5.33,
   rOffset: 55,
   gOffset: 35,
   bOffset: 15,
   scale: 1,
-  displace: 1.3,
+  displace: 3.1,
 });
 
 const dimensions = reactive({

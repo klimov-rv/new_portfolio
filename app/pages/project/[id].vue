@@ -75,7 +75,7 @@ useSeoMeta({
             <video
               ref="videoRef"
               :src="project.video"
-              :poster="project.preview"
+              :poster="project.video_preview || project.preview"
               class="w-full h-full object-cover"
               loop
               muted
@@ -92,7 +92,7 @@ useSeoMeta({
                   class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-all hover:scale-110 hover:bg-white/20"
                 >
                   <svg
-                    class="w-6 h-6 text-white ml-1"
+                    class="w-6 h-6 text-white"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >

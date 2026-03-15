@@ -82,7 +82,6 @@
       <UiSmoothCursor />
     </ClientOnly>
   </div>
-  <ShaderControls />
 </template>
 <style>
 .overflow-hidden {

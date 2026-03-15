@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@nuxt/ui";
+/* @import "@nuxt/ui"; */
 @import "tw-animate-css";
 
 @theme static {
@@ -48,6 +48,10 @@
   --ring: var(--ui-primary);
 }
 
+body {
+  background-color: black;
+}
+
 /* Page transitions (effect 4 - between pages) */
 .page-enter-active {
   transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -67,11 +71,7 @@
   transform: translateY(-10px) scale(1.01);
 }
 
-/* Hide default cursor on desktop when smooth cursor is active */
-@media (pointer: fine) {
-
-  html,
-  body,
+.card-3d {
   * {
     cursor: none !important;
   }
@@ -79,12 +79,9 @@
 
 * {
   -webkit-user-select: none;
-  /* Chrome/Safari */
   -moz-user-select: none;
-  /* Firefox */
   -ms-user-select: none;
-  /* IE/Edge */
-  user-select: none; 
+  user-select: none;
 }
 
 /* Разрешённые для выделения элементы */

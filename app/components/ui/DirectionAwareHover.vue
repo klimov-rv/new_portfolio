@@ -12,7 +12,14 @@ const props = withDefaults(defineProps<Props>(), {
   class: undefined,
 });
 
+const isLoadingImg = ref(true);
+const isErr = ref(false);
+const onErr = () => {
+  isErr.value = true;
+  isLoadingImg.value = false;
+};
 const containerClass = computed(() => [
+  'img__wrapper',
   'group/card relative overflow-hidden rounded-lg bg-transparent transition-all duration-300',
   // Mobile first responsive sizing
   'h-48 w-48', // Base mobile size
@@ -28,70 +35,91 @@ const containerClass = computed(() => [
   props.class,
 ]);
 
-const isLoadingImg = ref(true);
-const doSomethingOnLoad = () => (isLoadingImg.value = false);
-
 const imageClass = computed(() => [
-  ' h-full w-full object-cover transition-transform duration-300',
+  isErr.value ? 'err-bg' : '',
+  'img-show-smooth h-full w-full object-cover',
   props.imageClass,
 ]);
 </script>
 
 <template>
-  <div ref="divRef" :class="containerClass">
+  <div :class="containerClass">
     <NuxtImg
       :class="imageClass"
       :src="imageUrl"
       :preload="{ fetchPriority: 'high' }"
-      alt="image"
+      alt="portfolio project image"
+      @error="onErr"
+      placeholder
       placeholder-class="skeleton-bg"
-      loading="lazy"
-      @load="doSomethingOnLoad"
     />
+    <span class="err-msg">Ошибка загрузки изображения</span>
   </div>
 </template>
 
 <style scoped lang="scss">
-.skeleton-bg {
-  background: linear-gradient(
-      70deg,
-      #cecece31,
-      #cecece31,
-      #cecece31,
-      #ffffff,
-      #cecece,
-      #c2c2c2,
-      #7c7c7c,
-      #7c7c7c,
-      #ffffff,
-      #ffffff,
-      #ffffff,
-      #ffffff,
-      #cecece31,
-      #cecece31,
-      #cecece31,
-      #cecece31,
-      #cecece31
-    )
-    0 0 / 1100% 300%;
-  animation: 3s infinite skeletBG ease-out;
+.img__wrapper {
+  .img-show-smooth {
+    opacity: 1;
+    transition: 0.3s all;
+  }
+  img.skeleton-bg {
+    background: linear-gradient(
+        70deg,
+        #cecece31,
+        #cecece31,
+        #cecece31,
+        #ffffff,
+        #cecece,
+        #c2c2c2,
+        #7c7c7c,
+        #7c7c7c,
+        #ffffff,
+        #ffffff,
+        #ffffff,
+        #ffffff,
+        #cecece31,
+        #cecece31,
+        #cecece31,
+        #cecece31,
+        #cecece31
+      )
+      0 0 / 1100% 300%;
+    animation: 3s infinite skeletBG ease-out;
 
-  opacity: 0.7;
-  filter: contrast(1);
-  height: 100%;
+    opacity: 0.3;
+    filter: contrast(1);
+    height: 100%;
+  }
 
-  img {
+  @keyframes skeletBG {
+    0% {
+      background-position: 0%;
+    }
+
+    100% {
+      background-position: 100%;
+    }
+  }
+
+  .err-bg {
     display: none;
   }
-}
 
-@keyframes skeletBG {
-  0% {
-    background-position: 0%;
+  .err-msg {
+    display: none;
   }
 
-  100% {
-    background-position: 100%;
+  .err-bg + .err-msg {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-transform: uppercase;
+    border: 1px solid white;
+    opacity: 0.3;
   }
 }
 

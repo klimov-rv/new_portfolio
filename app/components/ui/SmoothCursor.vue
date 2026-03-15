@@ -46,18 +46,12 @@ let bumpCursorTween: gsap.core.Tween | null = null;
 // Данные одной линии
 interface LineData {
   element: SVGLineElement; // DOM-элемент <line>
-  x: number; // текущая координата начала линии (x1)
-  y: number; // текущая координата начала линии (y1)
+  x: number;
+  y: number;
 }
 
 const easing = gsap.parseEase('back.inOut(1.7)'); // можем использовать?
-const {
-  totalLines = 100,
-  ease = 0.75,
-  lineColor = '#3f51b5',
-  lineWidth = 2,
-  startOffset = 15,
-} = lineProps;
+const { totalLines, ease, lineColor, lineWidth, startOffset } = lineProps;
 
 // Один общий объект мыши (реактивный, но не заменяемый)
 const mousePos = reactive<Position>({ x: 0, y: 0 });

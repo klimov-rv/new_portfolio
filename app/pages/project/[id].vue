@@ -29,8 +29,6 @@ useSeoMeta({
 
 <template>
   <div v-if="project" class="relative min-h-screen">
-    <div class="fixed inset-0 z-0 bg-black/78 pointer-events-none" />
-
     <div class="relative z-10 pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div class="max-w-5xl mx-auto">
         <!-- Back button -->
@@ -40,17 +38,18 @@ useSeoMeta({
         >
           <span
             class="group-hover:-translate-x-1 transition-transform inline-block"
-            >←</span
           >
+            ←
+          </span>
           <span>Все проекты</span>
         </NuxtLink>
 
         <!-- Project header -->
         <div class="mb-10 animate-slide-in">
           <div class="flex items-center gap-4 mb-4">
-            <span class="font-mono text-white/25 text-xs">{{
-              project.year
-            }}</span>
+            <span class="font-mono text-white/25 text-xs">
+              {{ project.year }}
+            </span>
             <span
               class="font-mono text-white/25 text-xs uppercase tracking-widest"
               >{{ project.type }}</span
@@ -91,13 +90,7 @@ useSeoMeta({
                 <div
                   class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-all hover:scale-110 hover:bg-white/20"
                 >
-                  <svg
-                    class="w-6 h-6 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+                  <UiPlay class="play-svg-shadow" />
                 </div>
               </button>
             </Transition>
@@ -106,19 +99,13 @@ useSeoMeta({
               class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center hover:bg-black/60 transition-colors"
               @click="toggleVideo"
             >
-              <svg
-                class="w-4 h-4 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-              </svg>
+              <UiPause />
             </button>
           </template>
 
           <template v-else>
             <img
-              :src="project.preview"
+              :src="project.video_preview || project.preview"
               :alt="project.title"
               class="w-full h-full object-cover"
             />
@@ -202,7 +189,10 @@ useSeoMeta({
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+.play-svg-shadow {
+  filter: drop-shadow(1px 1px 10px gray);
+}
 @keyframes slide-in {
   from {
     opacity: 0;

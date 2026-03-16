@@ -48,8 +48,9 @@ export function useCursorTail(
       const prev = lines[i - 1];
       const curr = lines[i];
       if (prev && curr) {
-        curr.x += (prev.x - curr.x) * ease;
-        curr.y += (prev.y - curr.y) * ease;
+        const mappedEase = gsap.utils.mapRange(0, lines.length, 0.97, 0.99, i);
+        curr.x += (prev.x - curr.x) * mappedEase;
+        curr.y += (prev.y - curr.y) * mappedEase;
 
         curr.element.setAttribute('x1', curr.x.toString());
         curr.element.setAttribute('y1', curr.y.toString());
@@ -94,9 +95,7 @@ export function useCursorTail(
     animation = gsap.to(
       {},
       {
-        duration: 2500,
         repeat: -1,
-        ease: 'back.inOut(1.7)',
         onUpdate: updateLines,
       },
     );

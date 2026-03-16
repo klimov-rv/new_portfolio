@@ -40,6 +40,7 @@ export const useProjects = () => {
       details:
         'Вёрстка лендинга женского клуба. Главная страница состоит из 9 секций. Уникальный дизайн с нестандартной анимацией. Адаптив, Pixel-perfect и Motion Design. Реализованы модальные окна и страница 404.',
       preview: '/projects_thumb/2.fb1cfb60.jpg',
+      video_preview: '/projects_thumb/2_big.dda0bf93.jpg',
       video: '/video/wish-card.9fde285d.mp4',
       tags: ['HTML/CSS', 'JavaScript', 'Motion Design', 'Адаптив'],
     },
@@ -84,6 +85,7 @@ export const useProjects = () => {
       details:
         'Интернет-магазин стильных пиджаков и аксессуаров Di Valore. Реализован уникальный и современный дизайн. Интеграция на платформе InSales. Реализованы страницы: Главная, Карточка товара, Каталог, Каталог аксессуаров.',
       preview: '/projects_thumb/4.3d0ce318.jpg',
+      video_preview: '/projects_thumb/4_big.3a4c998b.jpg',
       video: '/video/4.f6bf01dc.mp4',
       tags: ['InSales', 'E-commerce', 'Дизайн', 'Frontend'],
     },
@@ -98,6 +100,7 @@ export const useProjects = () => {
       details:
         'Классический интернет-магазин инструментов Kawasaki на платформе 1С-Битрикс. Полная разработка «под ключ» — от проектирования до запуска. Реализован полный функционал интернет-магазина с каталогом, корзиной и оформлением заказа.',
       preview: '/projects_thumb/6.dffe976f.jpg',
+      video_preview: '/projects_thumb/6_big.657e9032.jpg',
       tags: ['Bitrix', 'E-commerce', 'PHP', 'Разработка'],
     },
     {
@@ -111,6 +114,7 @@ export const useProjects = () => {
       details:
         'Статичный сайт услуг с мобильной версией. Для экономии на хостинге выбран SSG Joomla, статика размещена напрямую на GitHub с привязанным доменом. Адаптивная вёрстка. Уникальный дизайн с расставленными блоками «призыва к действию» на стандартные всплывающие окна обратной связи для максимальной конверсии и генерации лидов.',
       preview: '/projects_thumb/7.6d92090d.jpg',
+      video_preview: '/projects_thumb/7_big.d26094fb.jpg',
       video: '/video/7.befc007b.mp4',
       tags: ['Joomla', 'SSG', 'GitHub Pages', 'Адаптив'],
     },

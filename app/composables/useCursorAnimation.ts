@@ -28,12 +28,12 @@ export function useCursorAnimation(
 
     bumpTween = gsap.to(innerEl.value, {
       duration: 0.3,
-      scale: 0.7,
+      scale: 0.3,
       paused: true,
       onComplete: () => {
-        gsap.to(outerEl.value, {
+        gsap.to(innerEl.value, {
           duration: 0.2,
-          scale: 1,
+          scale: 0.5,
           ease: easing,
         });
       },

@@ -1,264 +1,304 @@
-<script lang="ts" setup>
-import gsap from 'gsap';
-import { useEventListener, useTimeout } from '@vueuse/core';
-import { useSpring, useMotionValueEvent } from 'motion-v';
-import { useSpeedController } from '~/composables/useSpeedController';
-import { useCursorTail } from '~/composables/useCursorTail';
-import { useCursorAnimation } from '~/composables/useCursorAnimation';
-import { useMouseVelocity } from '~/composables/useMouseVelocity';
-import { useTargetObserver } from '~/composables/useTargetObserver';
-import type { Position } from '~/types/shader';
+<script setup lang="ts">
+import type { HTMLAttributes } from 'vue';
+import { cn } from '@inspira-ui/plugins';
 
 interface Props {
-  enlargeTargetSelector?: string;
-  fullCursorSize?: number;
-  observerRoot?: HTMLElement | string;
+  friction?: number;
+  trails?: number;
+  size?: number;
+  dampening?: number;
+  tension?: number;
+  class?: HTMLAttributes['class'];
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  enlargeTargetSelector: '.card-3d',
-  fullCursorSize: 35,
-  observerRoot: 'body',
+  friction: 0.5,
+  trails: 20,
+  size: 50,
+  dampening: 0.25,
+  tension: 0.98,
 });
 
-const springConfig = {
-  damping: 10,
-  stiffness: 150,
-  restDelta: 0.005,
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+
+interface NodeType {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
+
+interface WaveOptions {
+  phase?: number;
+  offset?: number;
+  frequency?: number;
+  amplitude?: number;
+}
+
+interface LineOptions {
+  spring: number;
+}
+
+class Wave {
+  phase: number = 0;
+  offset: number = 0;
+  frequency: number = 0.001;
+  amplitude: number = 1;
+  private e: number = 0;
+
+  constructor(options: WaveOptions = {}) {
+    this.init(options);
+  }
+
+  init(options: WaveOptions): void {
+    this.phase = options.phase || 0;
+    this.offset = options.offset || 0;
+    this.frequency = options.frequency || 0.001;
+    this.amplitude = options.amplitude || 1;
+  }
+
+  update(): number {
+    this.phase += this.frequency;
+    this.e = this.offset + Math.sin(this.phase) * this.amplitude;
+    return this.e;
+  }
+
+  value(): number {
+    return this.e;
+  }
+}
+
+class Node implements NodeType {
+  x: number = 0;
+  y: number = 0;
+  vx: number = 0;
+  vy: number = 0;
+}
+
+class Line {
+  spring: number = 0;
+  friction: number = 0;
+  nodes: NodeType[] = [];
+
+  constructor(options: LineOptions) {
+    this.init(options);
+  }
+
+  init(options: LineOptions): void {
+    this.spring = options.spring + 0.1 * Math.random() - 0.02;
+    this.friction = E.friction + 0.01 * Math.random() - 0.002;
+    this.nodes = [];
+
+    for (let n = 0; n < E.size; n++) {
+      const t = new Node();
+      t.x = pos.x;
+      t.y = pos.y;
+      this.nodes.push(t);
+    }
+  }
+
+  update(): void {
+    let e = this.spring;
+    let t = this.nodes[0];
+
+    t.vx += (pos.x - t.x) * e;
+    t.vy += (pos.y - t.y) * e;
+
+    for (let i = 0, a = this.nodes.length; i < a; i++) {
+      t = this.nodes[i];
+
+      if (i > 0) {
+        const n = this.nodes[i - 1];
+        t.vx += (n.x - t.x) * e;
+        t.vy += (n.y - t.y) * e;
+        t.vx += n.vx * E.dampening;
+        t.vy += n.vy * E.dampening;
+      }
+
+      t.vx *= this.friction;
+      t.vy *= this.friction;
+      t.x += t.vx;
+      t.y += t.vy;
+      e *= E.tension;
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D): void {
+    let e: NodeType, t: NodeType;
+    let n = this.nodes[0].x;
+    let i = this.nodes[0].y;
+
+    ctx.beginPath();
+    ctx.moveTo(n, i);
+
+    for (let a = 1, o = this.nodes.length - 2; a < o; a++) {
+      e = this.nodes[a];
+      t = this.nodes[a + 1];
+      n = 0.5 * (e.x + t.x);
+      i = 0.5 * (e.y + t.y);
+      ctx.quadraticCurveTo(e.x, e.y, n, i);
+    }
+
+    e = this.nodes[this.nodes.length - 2];
+    t = this.nodes[this.nodes.length - 1];
+    ctx.quadraticCurveTo(e.x, e.y, t.x, t.y);
+    ctx.stroke();
+    ctx.closePath();
+  }
+}
+
+let ctx: CanvasRenderingContext2D & { running?: boolean; frame?: number };
+let f: Wave;
+let pos = { x: 0, y: 0 };
+let lines: Line[] = [];
+
+const E = {
+  debug: true,
+  friction: props.friction,
+  trails: props.trails,
+  size: props.size,
+  dampening: props.dampening,
+  tension: props.tension,
 };
 
-const velocity = ref<Position>({ x: 0, y: 0 });
-const previousAngle = ref(0);
-const accumulatedRotation = ref(0);
+function createLines(): void {
+  lines = [];
+  for (let e = 0; e < E.trails; e++) {
+    lines.push(new Line({ spring: 0.4 + (e / E.trails) * 0.025 }));
+  }
+}
 
-const cursorX = useSpring(0, springConfig);
-const cursorY = useSpring(0, springConfig);
-const rotation = useSpring(0, { ...springConfig, damping: 60, stiffness: 300 });
-const scale = useSpring(1, { ...springConfig, stiffness: 500, damping: 35 });
-
-// State
-const showFilter = ref(true);
-const isMouseDown = ref(false);
-const clientPos = reactive({ x: 0, y: 0 });
-const mousePos = reactive<Position>({ x: 0, y: 0 });
-
-// Refs
-const cursorWrapper = ref<HTMLElement | null>(null);
-const innerCursor = ref<HTMLElement | null>(null);
-const outerCursor = ref<HTMLElement | null>(null);
-const cursorTail = ref<SVGElement | null>(null);
-
-// Composables
-const shaderState = useShaderState();
-const { currentSpeed, setTargetSpeed } = useSpeedController(1);
 const { speed, update: updateVelocity } = useMouseVelocity();
-const {
-  liquidGlassSize,
-  createAnimations,
-  onEnter,
-  onLeave,
-  destroy: destroyAnimations,
-} = useCursorAnimation(innerCursor, outerCursor);
-const { init: initTail, destroy: destroyTail } = useCursorTail(
-  cursorTail,
-  mousePos,
-  {
-    totalLines: 110,
-    ease: 0.97,
-    lineColor: '#ccc',
-    lineWidth: 5,
-    startOffset: 15,
-  },
-);
 
-useMotionValueEvent(cursorX, 'change', (value) => {
-  mousePos.x = value;
-});
+function updatePosition(e: MouseEvent | TouchEvent): void {
+  // sideeffect
+  updateVelocity(e);
 
-useMotionValueEvent(cursorY, 'change', (value) => {
-  mousePos.y = value;
-});
-
-// Mouse handlers
-const onMouseMove = (e: MouseEvent) => {
-  const pos = { x: e.clientX, y: e.clientY };
-
-  cursorX.set(pos.x);
-  cursorY.set(pos.y);
-
-  Object.assign(clientPos, pos);
-
-  const vel = updateVelocity(pos);
-
-  if (isMouseDown.value) {
-    shaderState?.updateShaderMouse(pos);
+  if ('touches' in e) {
+    pos.x = e.touches[0].pageX;
+    pos.y = e.touches[0].pageY;
+  } else {
+    pos.x = e.clientX;
+    pos.y = e.clientY;
   }
 
-  if (vel.x ** 2 + vel.y ** 2 > 0.01) {
-    setTargetSpeed(speed.value);
-    const angle =
-      Math.atan2(velocity.value.y, velocity.value.x) * (180 / Math.PI) + 90;
-    let diff = angle - previousAngle.value;
-    if (diff > 180) diff -= 360;
-    if (diff < -180) diff += 360;
-    accumulatedRotation.value += diff;
-    rotation.set(accumulatedRotation.value);
-    previousAngle.value = angle;
-    scale.set(0.95);
-    useTimeout(150, { callback: () => scale.set(1) });
+  e.preventDefault();
+}
+
+function handleTouchMove(e: TouchEvent): void {
+  if (e.touches.length === 1) {
+    pos.x = e.touches[0].pageX;
+    pos.y = e.touches[0].pageY;
   }
-};
+}
 
-const onMouseDown = (e: MouseEvent) => {
-  isMouseDown.value = true;
-  shaderState?.setMouseDown(true);
-  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
-};
+function render(): void {
+  if (ctx.running) {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = `hsla(${Math.round(f.update())},50%,50%,0.2)`;
+    ctx.lineWidth = 1;
 
-const onMouseUp = (e: MouseEvent) => {
-  isMouseDown.value = false;
-  shaderState?.setMouseDown(false);
-  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
-};
+    for (let t = 0; t < E.trails; t++) {
+      const e = lines[t];
+      e.update();
+      e.draw(ctx);
+    }
 
-// Position loop
-const updatePosition = () => {
-  if (cursorWrapper.value) {
-    gsap.set(cursorWrapper.value, { x: clientPos.x, y: clientPos.y });
+    ctx.frame = (ctx.frame || 0) + 1;
+    window.requestAnimationFrame(render);
   }
-  requestAnimationFrame(updatePosition);
-};
+}
 
-// Target observer
-const rootElement = computed(() =>
-  typeof props.observerRoot === 'string'
-    ? document.querySelector(props.observerRoot)
-    : props.observerRoot || document.body,
-);
+function resizeCanvas(): void {
+  if (ctx && ctx.canvas) {
+    ctx.canvas.width = window.innerWidth - 20;
+    ctx.canvas.height = window.innerHeight;
+  }
+}
 
-const targetObserver = useTargetObserver(
-  props.enlargeTargetSelector,
-  rootElement.value as HTMLElement | null,
-  onEnter,
-  onLeave,
-);
+function onMouseMove(e: MouseEvent | TouchEvent): void {
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('touchstart', onMouseMove);
+  document.addEventListener('mousemove', updatePosition);
+  document.addEventListener('touchmove', updatePosition);
+  document.addEventListener('touchstart', handleTouchMove);
 
-// Route change handler
-const route = useRoute();
-watch(
-  () => route.fullPath,
-  async () => {
-    onLeave();
-    await nextTick();
-    targetObserver.refresh();
-  },
-);
+  updatePosition(e);
+  createLines();
+  render();
+}
 
-// Speed sync
-watch(currentSpeed, (val) => {
-  shaderState.setSpeed(val);
-});
+function handleFocus(): void {
+  if (!ctx.running) {
+    ctx.running = true;
+    render();
+  }
+}
 
-// Lifecycle
+function handleBlur(): void {
+  ctx.running = true;
+}
+
+function initCanvas(): void {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+
+  ctx = canvas.getContext('2d') as CanvasRenderingContext2D & {
+    running?: boolean;
+    frame?: number;
+  };
+
+  ctx.running = true;
+  ctx.frame = 1;
+
+  f = new Wave({
+    phase: Math.random() * 2 * Math.PI,
+    amplitude: 85,
+    frequency: 0.0015,
+    offset: 285,
+  });
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('touchstart', onMouseMove);
+  document.body.addEventListener('orientationchange', resizeCanvas);
+  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('focus', handleFocus);
+  window.addEventListener('blur', handleBlur);
+
+  resizeCanvas();
+}
+
+function cleanup(): void {
+  if (ctx) {
+    ctx.running = false;
+  }
+
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('mousemove', updatePosition);
+  document.removeEventListener('touchstart', onMouseMove);
+  document.removeEventListener('touchstart', handleTouchMove);
+  document.removeEventListener('touchmove', updatePosition);
+  document.body.removeEventListener('orientationchange', resizeCanvas);
+  window.removeEventListener('resize', resizeCanvas);
+  window.removeEventListener('focus', handleFocus);
+  window.removeEventListener('blur', handleBlur);
+}
+
 onMounted(() => {
-  if (!cursorWrapper.value || !innerCursor.value || !outerCursor.value) return;
-
-  // Initial position
-  mousePos.x = window.innerWidth / 2;
-  mousePos.y = window.innerHeight / 2;
-
-  // Setup
-  initTail();
-  createAnimations(props.fullCursorSize, gsap.parseEase('back.inOut(1.7)'));
-  targetObserver.init();
-
-  // Event listeners
-  useEventListener(window, 'mousemove', onMouseMove);
-  useEventListener(window, 'mousedown', onMouseDown);
-  useEventListener(window, 'mouseup', onMouseUp);
-
-  // Start loop
-  requestAnimationFrame(updatePosition);
+  initCanvas();
 });
 
 onUnmounted(() => {
-  targetObserver.destroy();
-  destroyAnimations();
-  destroyTail();
+  cleanup();
 });
 </script>
 
 <template>
-  <div class="default-cursor-tooltip">VIEW</div>
-  <div ref="cursorWrapper" class="cursor-wrapper">
-    <div
-      ref="innerCursor"
-      class="custom-cursor custom-cursor__inner backdrop-blur-sm"
-    />
-    <div ref="outerCursor" class="custom-cursor custom-cursor__outer" />
-    <UiCursorLiquidGlass v-if="showFilter" :size="liquidGlassSize" />
-  </div>
-  <svg ref="cursorTail" class="cursor-tail"></svg>
+  <canvas
+    id="canvas"
+    ref="canvasRef"
+    :class="cn(`pointer-events-none fixed inset-0 z-50`, props.class)"
+  />
 </template>
-
-<style lang="scss">
-@media (any-pointer: fine) {
-  .cursor-tail {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 9999;
-  }
-  .cursor-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(0, 0);
-    will-change: transform;
-  }
-
-  .custom-cursor {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-radius: 50%;
-    pointer-events: none;
-    will-change: transform, width, height, background-color, opacity;
-  }
-
-  .custom-cursor__inner {
-    width: 6px;
-    height: 6px;
-    background-color: #fff;
-    transform: translate(-50%, -50%);
-    z-index: 2;
-  }
-
-  .custom-cursor__outer {
-    width: 1px;
-    height: 1px;
-    border: 2px solid white;
-    background-color: transparent;
-    transform: translate(-50%, -50%);
-    transition: background-color 0.3s, opacity 0.3s, transform 0.2s;
-    z-index: 1;
-  }
-
-  .cursor-wrapper.has-blend-mode {
-    mix-blend-mode: difference;
-  }
-
-  .cursor-wrapper.is-outside {
-    opacity: 0;
-  }
-
-  .default-cursor-tooltip {
-    display: none;
-  }
-}
-</style>

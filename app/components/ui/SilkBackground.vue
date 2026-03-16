@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import shaderCode from 'shaders/silk.glsl?raw';
 import type { ShaderControls, ShaderProps } from '~/types/shader';
-import { useShaderToy } from '~/composables/useShaderToy';
 
 const props = defineProps<ShaderControls>();
 const shaderProps: ShaderProps = { ...props, shaderCode, mouseMode: 'click' };

@@ -5,7 +5,7 @@ export function useSpeedController(initialSpeed: number = 1) {
 
   // Параметры анимации
   const step = 0.1; // минимальный шаг
-  const throttleDelay = 300; // минимальная задержка между обновлениями в ms
+  const throttleDelay = 900; // минимальная задержка между обновлениями в ms
 
   let animationFrame: number | null = null;
   let lastUpdateTime = 0;

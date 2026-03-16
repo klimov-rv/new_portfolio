@@ -28,8 +28,6 @@ export function useCursorTail(
     y: number;
   }> = [];
 
-  let animation: gsap.core.Tween | null = null;
-
   const updateLines = () => {
     if (!lines.length) return;
 
@@ -44,11 +42,12 @@ export function useCursorTail(
       first.element.setAttribute('y2', mousePos.y.toString());
     }
 
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = 1; i <= lines.length; i++) {
       const prev = lines[i - 1];
       const curr = lines[i];
       if (prev && curr) {
-        const mappedEase = gsap.utils.mapRange(0, lines.length, 0.97, 0.99, i);
+        const mappedEase = gsap.utils.mapRange(0, lines.length, ease, 0.3, i);
+
         curr.x += (prev.x - curr.x) * mappedEase;
         curr.y += (prev.y - curr.y) * mappedEase;
 
@@ -76,33 +75,24 @@ export function useCursorTail(
       const x = -startOffset;
       const y = -startOffset;
 
+      const progress = i / totalLines;
+      const strokeWidth = Math.pow((1.3 - progress) * lineWidth, 1);
       line.setAttribute('x1', x.toString());
       line.setAttribute('y1', y.toString());
       line.setAttribute('x2', mousePos.x.toString());
       line.setAttribute('y2', mousePos.y.toString());
-
       line.setAttribute('stroke', lineColor);
-      line.setAttribute('stroke-width', lineWidth.toString());
       line.setAttribute('stroke-linecap', 'round');
-
-      const opacity = (totalLines - i) / totalLines;
-      line.setAttribute('opacity', opacity.toString());
+      line.setAttribute('stroke-width', strokeWidth.toString());
+      // const opacity = (totalLines - i) / totalLines;
+      line.setAttribute('opacity', '0.3');
 
       lines.push({ element: line, x, y });
     }
-
-    animation?.kill();
-    animation = gsap.to(
-      {},
-      {
-        repeat: -1,
-        onUpdate: updateLines,
-      },
-    );
+    gsap.ticker.add(updateLines);
   };
 
   const destroy = () => {
-    animation?.kill();
     if (svgElement.value) {
       svgElement.value.innerHTML = '';
     }

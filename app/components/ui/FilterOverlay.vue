@@ -1,43 +1,56 @@
 <script setup lang="ts">
+import { useEventListener } from '@vueuse/core';
 const route = useRoute();
 
 const isHomePage = computed(() => route.fullPath === '/');
+const isMouseDown = ref(false);
+const justDisableColours = ref(true);
 
 // Sideeffects
-const lastTime = ref(Date.now());
 const { speed } = useMouseVelocity();
 const { currentSpeed: targetSpeed, setTargetSpeed } = useSpeedController(1);
 const shaderState = useShaderState();
 
-const isMovedSlow = computed(() => targetSpeed.value < 0.8);
-const isHideColours = computed(() => !isHomePage.value);
-
-// Sideeffect 1
-watch(speed, (val) => {
-  if (speed.value > 0.1) {
-    // isHideColours.value = true;
-    const now = Date.now();
-    setTargetSpeed(val);
-    const timerId = setTimeout(() => {
-      const dt = now - lastTime.value;
-
-      if (dt > 2900) {
-        setTargetSpeed(0.5);
-        removeTimer();
-      }
-    }, 1000);
-    function removeTimer() {
-      // isHideColours.value = false;
-      clearTimeout(timerId);
-    }
-  }
-});
+const isHideColours = computed(
+  () => !isHomePage.value || isMouseDown.value || justDisableColours.value,
+);
 
 // Sideeffect 2: Speed sync
 watch(targetSpeed, (val) => {
-  console.log('currentSpeed', val);
   shaderState.setSpeed(val);
 });
+
+// Lifecycle
+onMounted(() => {
+  useEventListener(window, 'mousemove', onMouseMove);
+  useEventListener(window, 'mousedown', onMouseDown);
+  useEventListener(window, 'mouseup', onMouseUp);
+});
+
+// Mouse handlers
+const onMouseMove = (e: MouseEvent) => {
+  const pos = { x: e.clientX, y: e.clientY };
+
+  if (isMouseDown.value) {
+    shaderState?.updateShaderMouse(pos);
+  }
+
+  if (speed.value > 0.1) {
+    setTargetSpeed(speed.value);
+  }
+};
+
+const onMouseDown = (e: MouseEvent) => {
+  isMouseDown.value = true;
+  shaderState?.setMouseDown(true);
+  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
+};
+
+const onMouseUp = (e: MouseEvent) => {
+  isMouseDown.value = false;
+  shaderState?.setMouseDown(false);
+  shaderState?.updateShaderMouse({ x: e.clientX, y: e.clientY });
+};
 </script>
 
 <template>

@@ -4,8 +4,8 @@ export function useSpeedController(initialSpeed: number = 1) {
   const isAnimating = ref(false);
 
   // Параметры анимации
-  const step = 0.1; // минимальный шаг
-  const throttleDelay = 900; // минимальная задержка между обновлениями в ms
+  const step = 0.3; // минимальный шаг
+  const throttleDelay = 200; // минимальная задержка между обновлениями в ms
 
   let animationFrame: number | null = null;
   let lastUpdateTime = 0;

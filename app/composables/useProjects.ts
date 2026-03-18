@@ -10,6 +10,7 @@ export interface Project {
   video_preview?: string;
   video?: string;
   links?: { label: string; url: string }[];
+  demo_links?: { label: string; url: string }[];
   tags: string[];
 }
 
@@ -24,10 +25,55 @@ export const useProjects = () => {
       description:
         'Вёрстка «под ключ» на WordPress. 10 страниц уникального дизайна, адаптив, Pixel-perfect и Motion Design, продвинутая анимация.',
       details:
-        'Полная вёрстка корпоративного сайта на WordPress. Реализованы страницы: Главная, О компании, Продукция (каталог), Закупка зерна, Вакансии, Статьи, Контакты, Корзина, Оформление заказа. Уникальный дизайн с продвинутой анимацией и Motion Design. Pixel-perfect вёрстка по макету Figma.',
+        'Полная вёрстка корпоративного сайта на WordPress. 10 страниц уникального дизайна: "Главная", "О компании", "Продукция (каталог)", "Закупка зерна", "Вакансии", "Статьи", "Контакты", "Корзина", "Оформление заказа". Интерактивный дизайн с продвинутой анимацией. Pixel-perfect вёрстка по макету Figma.',
       preview: '/projects_thumb/1.2e4c3754.jpg',
       video: '/video/pl2.mp4',
       tags: ['WordPress', 'Motion Design', 'Pixel-perfect', 'Адаптив'],
+      links: [
+        {
+          label: 'Исходник figma',
+          url:
+            'https://www.figma.com/file/q4JMNnji6aFgADekHYVbmj/Muka?node-id=1%3A2&t=cjaNj5UYLpgh8CaI-0',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Главная',
+          url: 'https://klimov-rv.github.io/muka.layout/',
+        },
+        {
+          label: 'О компании',
+          url: 'https://klimov-rv.github.io/muka.layout/aboutus.html',
+        },
+        {
+          label: 'Продукция (каталог)',
+          url: 'https://klimov-rv.github.io/muka.layout/production.html',
+        },
+        {
+          label: 'Закупка зерна',
+          url: 'https://klimov-rv.github.io/muka.layout/zakupka.html',
+        },
+        {
+          label: 'Вакансии',
+          url: 'https://klimov-rv.github.io/muka.layout/vakansii.html',
+        },
+        {
+          label: 'Статьи',
+          url: 'https://klimov-rv.github.io/muka.layout/news.html',
+        },
+        {
+          label: 'Контакты',
+          url: 'https://klimov-rv.github.io/muka.layout/contact.html',
+        },
+        {
+          label: 'Корзина',
+          url: 'https://klimov-rv.github.io/muka.layout/cart.html',
+        },
+        {
+          label: 'Оформление заказа',
+          url: 'https://klimov-rv.github.io/muka.layout/cart-checkout.html',
+        },
+      ],
     },
     {
       id: 'private-women-club',
@@ -43,6 +89,23 @@ export const useProjects = () => {
       video_preview: '/projects_thumb/2_big.dda0bf93.jpg',
       video: '/video/wish-card.9fde285d.mp4',
       tags: ['HTML/CSS', 'JavaScript', 'Motion Design', 'Адаптив'],
+      links: [
+        {
+          label: 'Исходник figma',
+          url:
+            'https://www.figma.com/file/0VMX7rZt3wAuUhvvjWEuBJ/%D0%9A%D0%B0%D1%80%D1%82%D0%B0-%D0%B6%D0%B5%D0%BB%D0%B0%D0%BD%D0%B8%D0%B9?node-id=194%3A2307&t=NdUXUyUVWUywVwSt-0',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Главная',
+          url: 'https://klimov-rv.github.io/wish-card.layout/',
+        },
+        {
+          label: 'Демо',
+          url: 'https://klimov-rv.github.io/wish-card.layout/demo.html',
+        },
+      ],
     },
     {
       id: 'perco',
@@ -58,6 +121,31 @@ export const useProjects = () => {
       video_preview: '/projects_thumb/3_big.4ade9218.jpg',
       video: '/video/perco.6d666d6a.mp4',
       tags: ['Мультиязычность', 'UX/UI', 'Видео', 'Анимация'],
+      links: [
+        {
+          label: 'Исходник figma',
+          url:
+            'https://www.figma.com/file/GKliJSXY44v2GQFlnpxoeM/%D0%9B%D0%B5%D0%BD%D0%B4%D0%B8%D0%BD%D0%B3-%D0%A1%D0%BA%D0%BE%D1%80%D0%BE%D1%81%D1%82%D0%BD%D1%8B%D0%B5',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Мультиязычная версия',
+          url: 'https://klimov-rv.github.io/perco.case/',
+        },
+        {
+          label: 'Русская версия',
+          url: 'https://speedgate.perco.ru/',
+        },
+        {
+          label: 'Английская версия',
+          url: 'https://speedgate.perco.com/',
+        },
+        {
+          label: 'Французская версия',
+          url: 'https://fr.speedgate.perco.com/',
+        },
+      ],
     },
     {
       id: 'segment',
@@ -73,6 +161,12 @@ export const useProjects = () => {
       video_preview: '/projects_thumb/5_big.2498e385.jpg',
       video: '/video/5.eddfbc63.mp4',
       tags: ['Адаптив', 'CMS', 'Редактор', 'Доработка'],
+      links: [
+        {
+          label: 'Реальный проект',
+          url: 'https://segment.ru/',
+        },
+      ],
     },
     {
       id: 'di-valore',
@@ -88,6 +182,30 @@ export const useProjects = () => {
       video_preview: '/projects_thumb/4_big.3a4c998b.jpg',
       video: '/video/4.f6bf01dc.mp4',
       tags: ['InSales', 'E-commerce', 'Дизайн', 'Frontend'],
+      links: [
+        {
+          label: 'Реальный проект',
+          url: 'https://devalore.ru/',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Главная',
+          url: 'https://klimov-rv.github.io/divalore.case/',
+        },
+        {
+          label: 'Карточка товара',
+          url: 'https://klimov-rv.github.io/divalore.case/card.html',
+        },
+        {
+          label: 'Каталог',
+          url: 'https://klimov-rv.github.io/divalore.case/catalog.html',
+        },
+        {
+          label: 'Каталог аксессуаров',
+          url: 'https://klimov-rv.github.io/divalore.case/catalog-acess.html',
+        },
+      ],
     },
     {
       id: 'kawasaki',
@@ -101,7 +219,20 @@ export const useProjects = () => {
         'Классический интернет-магазин инструментов Kawasaki на платформе 1С-Битрикс. Полная разработка «под ключ» — от проектирования до запуска. Реализован полный функционал интернет-магазина с каталогом, корзиной и оформлением заказа.',
       preview: '/projects_thumb/6.dffe976f.jpg',
       video_preview: '/projects_thumb/6_big.657e9032.jpg',
+      video: '/video/6.f0bаа1dc.mp4',
       tags: ['Bitrix', 'E-commerce', 'PHP', 'Разработка'],
+      links: [
+        {
+          label: 'Реальный проект',
+          url: 'https://kawasaki-shop.ru/',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Страница "О компании"',
+          url: 'https://kawasaki-shop.ru/about/',
+        },
+      ],
     },
     {
       id: 'static-services',
@@ -117,6 +248,38 @@ export const useProjects = () => {
       video_preview: '/projects_thumb/7_big.d26094fb.jpg',
       video: '/video/7.befc007b.mp4',
       tags: ['Joomla', 'SSG', 'GitHub Pages', 'Адаптив'],
+      links: [
+        {
+          label: 'Реальный проект',
+          url: 'https://mair-site.github.io/',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Услуга - сборка мебели',
+          url: 'https://mair-site.github.io/sborka-mebeli/',
+        },
+        {
+          label: 'Услуга - муж на час',
+          url: 'https://mair-site.github.io/muzh-na-chas/',
+        },
+        {
+          label: 'Услуга - квартирный переезд',
+          url: 'https://mair-site.github.io/kvartirnyiy-pereezd/',
+        },
+        {
+          label: 'Услуга - строительство',
+          url: 'https://mair-site.github.io/stroitelstvo-remont/',
+        },
+        {
+          label: 'Примеры работ',
+          url: 'https://mair-site.github.io/clients/raborka-mebeli/',
+        },
+        {
+          label: 'Сотрудничество',
+          url: 'https://mair-site.github.io/partnership/',
+        },
+      ],
     },
   ];
 

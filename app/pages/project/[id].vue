@@ -28,25 +28,27 @@ useSeoMeta({
 </script>
 
 <template>
-  <div v-if="project" class="relative min-h-screen">
-    <div class="relative z-10 pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-5xl mx-auto">
-        <!-- Back button -->
-        <NuxtLink
-          to="/"
-          class="inline-flex items-center gap-2 font-mono text-xs text-white/30 hover:text-white/70 transition-colors mb-12 group"
+  <div v-if="project" class="min-h-screen">
+    <div class="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <div class="relative z-10 max-w-5xl mx-auto">
+        <div
+          class="animate-slide-in max-w-5xl flex items-center justify-between mb-5"
         >
-          <span
-            class="group-hover:-translate-x-1 transition-transform inline-block"
+          <!-- Back button -->
+          <NuxtLink
+            to="/"
+            class="inline-flex items-center gap-2 font-mono text-xs text-white/30 hover:text-white/70 transition-colors group"
           >
-            ←
-          </span>
-          <span>Все проекты</span>
-        </NuxtLink>
+            <span
+              class="group-hover:-translate-x-1 transition-transform inline-block"
+            >
+              ←
+            </span>
+            <span>Все проекты</span>
+          </NuxtLink>
 
-        <!-- Project header -->
-        <div class="mb-10 animate-slide-in">
-          <div class="flex items-center gap-4 mb-4">
+          <!-- Project date -->
+          <div class="flex items-center gap-4">
             <span class="font-mono text-white/25 text-xs">
               {{ project.year }}
             </span>
@@ -55,16 +57,12 @@ useSeoMeta({
               >{{ project.type }}</span
             >
           </div>
-          <h1
-            class="text-3xl sm:text-5xl font-bold text-white leading-tight mb-5"
-          >
-            {{ project.title }}
-          </h1>
-          <p class="text-white/55 text-lg max-w-2xl leading-relaxed">
-            {{ project.description }}
-          </p>
         </div>
-
+        <h1
+          class="text-3xl sm:text-5xl font-bold text-white leading-tight mb-5"
+        >
+          {{ project.title }}
+        </h1>
         <!-- Preview / Video block -->
         <div
           class="relative rounded-2xl overflow-hidden mb-14 bg-black/30 aspect-video animate-slide-in"
@@ -114,11 +112,19 @@ useSeoMeta({
 
         <!-- Project details grid -->
         <div
-          class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-14 animate-slide-in"
+          class="grid grid-cols-1 lg:grid-cols-4 gap-10 mb-14 animate-slide-in"
           style="animation-delay: 200ms;"
         >
+          <!-- <h1
+            class="text-3xl sm:text-5xl font-bold text-white leading-tight mb-5"
+          >
+            {{ project.title }}
+          </h1>
+          <p class="text-white/55 text-lg max-w-2xl leading-relaxed">
+            {{ project.description }}
+          </p> -->
           <!-- Main description -->
-          <div class="lg:col-span-2">
+          <div class="lg:col-span-2 space-y-4">
             <h2
               class="font-mono text-xs uppercase tracking-widest text-white/30 mb-5"
             >
@@ -129,22 +135,27 @@ useSeoMeta({
             </p>
           </div>
 
-          <!-- Sidebar -->
-          <div class="space-y-8">
-            <div>
+          <!-- Info-columns -->
+          <div class="space-y-4">
+            <div v-if="project.demo_links?.length">
               <h3
                 class="font-mono text-xs uppercase tracking-widest text-white/30 mb-4"
               >
-                Технологии
+                Демо
               </h3>
               <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="tag in project.tags"
-                  :key="tag"
-                  class="font-mono text-xs px-3 py-1.5 rounded-full bg-white/8 text-white/60 border border-white/10 hover:border-white/25 transition-colors"
-                >
-                  {{ tag }}
-                </span>
+                <ul>
+                  <li v-for="demo_link in project.demo_links">
+                    <a
+                      :key="demo_link.label"
+                      :href="demo_link.url"
+                      target="_blank"
+                      class="flex items-center gap-2 font-mono text-sm text-white/50 hover:text-white transition-colors group"
+                    >
+                      {{ demo_link.label }}
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
 
@@ -164,13 +175,31 @@ useSeoMeta({
                 >
                   <span
                     class="group-hover:translate-x-1 transition-transform inline-block"
-                    >→</span
                   >
+                    →
+                  </span>
                   {{ link.label }}
                 </a>
               </div>
             </div>
-
+          </div>
+          <div class="space-y-8">
+            <div>
+              <h3
+                class="font-mono text-xs uppercase tracking-widest text-white/30 mb-4"
+              >
+                Технологии
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="tag in project.tags"
+                  :key="tag"
+                  class="font-mono text-xs px-3 py-1.5 rounded-full bg-white/8 text-white/60 border border-white/10 hover:border-white/25 transition-colors"
+                >
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
             <div>
               <h3
                 class="font-mono text-xs uppercase tracking-widest text-white/30 mb-2"

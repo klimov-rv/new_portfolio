@@ -11,9 +11,7 @@ const { speed } = useMouseVelocity();
 const { currentSpeed: targetSpeed, setTargetSpeed } = useSpeedController(1);
 const shaderState = useShaderState();
 
-const isHideColours = computed(
-  () => !isHomePage.value || isMouseDown.value || justDisableColours.value,
-);
+const isHideColours = computed(() => !isHomePage.value || isMouseDown.value);
 
 // Sideeffect 2: Speed sync
 watch(targetSpeed, (val) => {
@@ -55,6 +53,7 @@ const onMouseUp = (e: MouseEvent) => {
 
 <template>
   <div
+    v-if="!justDisableColours"
     :class="[
       isHideColours ? 'hide-smooth' : 'show',
       'filter-overlay fixed inset-0 z-0 pointer-events-none',

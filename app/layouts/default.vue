@@ -16,14 +16,8 @@
       >
         <nav class="flex items-center justify-between">
           <!-- Logo with TextGlitch effect (effect 2) -->
-          <NuxtLink to="/" class="block">
-            <UiTextGlitch
-              text="klimovproject_"
-              :speed="0.4"
-              :enable-on-hover="true"
-              :enable-shadows="true"
-              class="!text-sm !font-bold !font-mono !text-white"
-            />
+          <NuxtLink to="/" class="logo-text">
+            klimovproject<span class="dash">_</span>
           </NuxtLink>
           <span
             class="hidden sm:block font-mono uppercase tracking-widest text-xs text-white/60"
@@ -123,9 +117,18 @@
     </ClientOnly>
   </div>
 </template>
-<style>
+<style lang="scss">
 .overflow-hidden {
   overflow: hidden;
   position: relative;
+}
+.logo-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  .dash {
+    color: #21b3a9;
+  }
 }
 </style>

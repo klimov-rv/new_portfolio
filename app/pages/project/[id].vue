@@ -48,7 +48,7 @@ useSeoMeta({
           </NuxtLink>
 
           <!-- Project date -->
-          <div class="flex items-center gap-4">
+          <div class="hidden sm:flex items-center gap-4">
             <span class="font-mono text-white/25 text-xs">
               {{ project.year }}
             </span>

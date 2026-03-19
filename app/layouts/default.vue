@@ -26,7 +26,7 @@
             />
           </NuxtLink>
           <span
-            class="font-mono uppercase tracking-widest text-xs text-white/60"
+            class="hidden sm:block font-mono uppercase tracking-widest text-xs text-white/60"
           >
             Portfolio
           </span>

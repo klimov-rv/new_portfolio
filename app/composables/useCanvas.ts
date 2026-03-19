@@ -3,7 +3,10 @@ export const useCanvas = (
   lines: ReturnType<typeof useLines>,
   wave: ReturnType<typeof useWave>,
 ) => {
-  let ctx: CanvasRenderingContext2D & { running?: boolean; frame?: number };
+  let ctx: (CanvasRenderingContext2D & {
+    running?: boolean;
+    frame?: number;
+  }) | undefined = undefined;
   let animationFrame: number;
 
   const resizeCanvas = () => {
@@ -54,6 +57,7 @@ export const useCanvas = (
   };
 
   return {
+    ctx,
     resizeCanvas,
     start,
     init,

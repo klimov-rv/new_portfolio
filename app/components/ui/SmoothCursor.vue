@@ -27,25 +27,25 @@ const config = useTrailConfig(props);
 const wave = useWave();
 const lines = useLines(config);
 const canvas = useCanvas(canvasRef, lines, wave);
+const { isTouchDevice } = useTouchDevice();
 
-// Сетап слушателей событий через useEventListener
-onMounted(() => {
+const initMouseTrail = () => {
+  if (isTouchDevice.value) return; // Не инициализируем на touch
   canvas.init();
-
-  // Автоматическая очистка при размонтировании
   useEventListener(document, 'mousemove', canvas.start, { once: true });
-  useEventListener(document, 'touchstart', canvas.start, { once: true });
   useEventListener(document, 'mousemove', lines.updatePosition);
-  useEventListener(document, 'touchmove', lines.updatePosition);
   useEventListener(document.body, 'orientationchange', canvas.resizeCanvas);
   useEventListener(window, 'resize', canvas.resizeCanvas);
   useEventListener(window, 'focus', () => {
-    if (canvas.ctx) canvas.ctx.running = true;
-    canvas.init();
+    if (canvas.ctx) canvas.init();
   });
   useEventListener(window, 'blur', () => {
-    if (canvas.ctx) canvas.ctx.running = false;
+    if (canvas.ctx) canvas.cleanup();
   });
+};
+
+onMounted(() => {
+  initMouseTrail();
 });
 
 onUnmounted(() => {

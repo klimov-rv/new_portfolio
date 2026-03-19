@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'url';
+import htmlHeaders from './headers.js'
 
 export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
@@ -8,6 +9,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
+    head: htmlHeaders
   },
   alias: {
     components: fileURLToPath(new URL('./app/components', import.meta.url)),

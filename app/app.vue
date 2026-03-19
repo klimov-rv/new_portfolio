@@ -22,7 +22,7 @@ if (process.client) {
       />
     </div>
 
-    <NuxtPage v-else />
+    <NuxtPage />
   </NuxtLayout>
 </template>
 <style>

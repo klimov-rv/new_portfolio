@@ -1,15 +1,15 @@
 import { fileURLToPath } from 'url';
-import htmlHeaders from './headers.js'
+import htmlHeaders from './headers.js';
 
 export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
   compatibilityDate: '2026-01-01',
   devtools: { enabled: true },
-  modules: ['@nuxt/ui', '@nuxt/image'],
+  modules: ['@nuxt/ui', '@nuxt/content', '@nuxt/image'],
   css: ['~/assets/css/main.css'],
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
-    head: htmlHeaders
+    head: htmlHeaders,
   },
   alias: {
     components: fileURLToPath(new URL('./app/components', import.meta.url)),

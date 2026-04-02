@@ -6,10 +6,10 @@ const { projects } = useProjects();
   <div class="relative min-h-screen">
     <div class="relative z-10 pt-28 pb-16 px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16 space-y-2">
-        <p class="font-mono text-white/30 text-xs uppercase tracking-[0.4em]">
+        <p class="font-mono text-white/50 text-xs uppercase tracking-[0.4em]">
           Frontend Developer · 2015–2026
         </p>
-        <p class="font-mono text-white/15 text-xs uppercase tracking-[0.6em]">
+        <p class="font-mono text-white/30 text-xs uppercase tracking-[0.6em]">
           Selected Works
         </p>
       </div>

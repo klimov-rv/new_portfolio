@@ -87,7 +87,7 @@ float silkd(vec2 uv, float t) {
 
 void mainImage(out vec4 fragColor, vec2 fragCoord) {
     float mr = min(iResolution.x, iResolution.y);
-    vec2 uv = fragCoord / mr;
+    vec2 uv = fragCoord / mr * 0.75;
 
     float t = iTime;
     uv.y += 0.03 * sin(8.0 * uv.x - t);
@@ -96,7 +96,7 @@ void mainImage(out vec4 fragColor, vec2 fragCoord) {
     // iMouse.z > 0.0 = активный клик (полная сила)
     // iMouse.w > 0.0 = затухание после отпускания
     if (iMouse.z > 0.0 || iMouse.w > 0.0) {
-        vec2 mouseUV = iMouse.xy / mr;
+        vec2 mouseUV = iMouse.xy / mr * 0.75;
         float dist = distance(mouseUV, uv);
         
         // Определяем силу эффекта:

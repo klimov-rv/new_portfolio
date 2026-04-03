@@ -23,7 +23,6 @@ useSeoMeta({
       <!-- Main content -->
       <div class="max-w-7xl mx-auto">
         <div class="bg-white/5 backdrop-blur-sm p-8 md:p-10">
-          <FeatDownloadButton />
           <ContentRenderer
             v-if="cvContent"
             :value="cvContent"
@@ -32,6 +31,7 @@ useSeoMeta({
         </div>
       </div>
     </div>
+    <FeatDownloadButton text="Скачать CV" />
   </div>
 </template>
 
@@ -43,15 +43,14 @@ useSeoMeta({
   --bg-glass: rgba(255, 255, 255, 0.03);
 
   // Typography
+  font-size: 16px;
   line-height: 1.6;
-  font-family: 'Fira Code', monospace;
+  font-family: monospace;
 
   // Headers
   h1 {
     display: none;
     font-size: 32px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-      'Liberation Mono', 'Courier New', monospace;
     line-height: 2em;
     font-weight: 300;
     text-align: center;
@@ -71,27 +70,25 @@ useSeoMeta({
   }
 
   h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-top: 2.5rem;
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.5rem;
-    color: var(--accent);
+    font-size: 1.35rem;
+    font-weight: 300;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: white;
     position: relative;
     display: inline-block;
     letter-spacing: -0.01em;
+
+    width: 100%;
+    text-align: center;
 
     a {
       color: inherit;
       text-decoration: none;
       transition: all 0.2s ease;
-
-      &:hover {
-        text-decoration: underline;
-      }
     }
     @media (min-width: 768px) {
-      font-size: 1.5rem;
+      font-size: 1.7rem;
     }
   }
 
@@ -145,14 +142,13 @@ useSeoMeta({
 
   // Links
   a {
-    color: var(--accent);
+    color: white;
     text-decoration: none;
     transition: all 0.2s ease;
     position: relative;
 
     &:hover {
       color: var(--accent);
-      text-decoration: underline;
     }
 
     // External link indicator
@@ -260,9 +256,9 @@ useSeoMeta({
   // Special styling for skills sections
   h2#ключевые-навыки,
   h2#дополнительные-навыки {
-    margin-top: 2rem;
+    margin-top: 0.5rem;
 
-    & + ul {
+    & + hr + ul {
       display: grid;
       grid-template-columns: 1fr;
       gap: 0.5rem 1.5rem;
@@ -312,7 +308,7 @@ useSeoMeta({
     font-size: 0.875rem;
     background: rgba(16, 185, 129, 0.1);
     color: var(--accent);
-    font-family: 'Fira Code', 'Courier New', monospace;
+    font-family: monospace;
   }
 
   // Blockquotes (if any)

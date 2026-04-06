@@ -36,7 +36,10 @@ const items = ref<NavigationMenuItem[]>([
     padding-bottom: 0;
   }
 
-  @media (max-width: 651px) {
+  .iconify + span > .iconify {
+    display: none;
+  }
+  @media (max-width: 640px) {
     .iconify + span {
       display: none;
     }

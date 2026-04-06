@@ -214,6 +214,7 @@ useSeoMeta({
 
   // Text formatting
   strong {
+    font-size: 18px;
     font-weight: 600;
     color: white;
 

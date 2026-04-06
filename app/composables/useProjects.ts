@@ -17,6 +17,69 @@ export interface Project {
 export const useProjects = () => {
   const projects: Project[] = [
     {
+      id: 'guestcard-barnaul',
+      year: 2023,
+      title: 'Guestcard города Барнаул',
+      subtitle: 'Туристический портал «под ключ»',
+      type: 'Фронтенд-разработка',
+      description:
+        'Туристический портал города Барнаул с интерактивной картой, аудио-экскурсиями и календарём событий.',
+      details:
+        'Полная разработка фронтенда туристического портала. Главная страница с собственными отметками достопримечательностей на Яндекс.Картах. Страница "Историческая линия" с SVG-анимацией маршрута по городу и аудио-записями для аудио-экскурсий. Календарь событий с фильтрацией по категориям. Адаптивная вёрстка, высокая производительность.',
+      preview: '/projects_thumb/guestcard-barnaul.webp',
+      video: '/video/barnaul06042026173309.mp4',
+      tags: [
+        'Bitrix',
+        'Аудио-экскурсии',
+        'Адаптив',
+        'JavaScript',
+        'Яндекс.Карты',
+      ],
+      links: [
+        {
+          label: 'Реальный проект',
+          url: 'https://guestcard.barnaul.org/',
+        },
+        {
+          label: 'Историческая линия',
+          url:
+            'https://guestcard.barnaul.org/objects/where_visit/istoricheskaya-liniya/',
+        },
+        {
+          label: 'Календарь событий',
+          url: 'https://guestcard.barnaul.org/about-barnaul/events_calendar/',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Историческая линия',
+          url:
+            'https://klimovproject.online/barnaul.layout/historical_line.html',
+        },
+        {
+          label: 'Исторический объект',
+          url:
+            'https://klimovproject.online/barnaul.layout/historical_object.html',
+        },
+        {
+          label: 'Календарь событий',
+          url: 'https://klimovproject.online/barnaul.layout/calendar.html',
+        },
+        {
+          label: 'Страница тематического раздела',
+          url: 'https://klimovproject.online/barnaul.layout/where_eat.html',
+        },
+        {
+          label: 'Аудиоэкскурсии',
+          url: 'https://klimovproject.online/barnaul.layout/audio_tours.html',
+        },
+        {
+          label: 'Главное событие',
+          url: 'https://klimovproject.online/barnaul.layout/main_event.html',
+        },
+      ],
+    },
+    {
       id: 'mukomolny',
       year: 2021,
       title: 'Мукомольный комбинат Володарский',

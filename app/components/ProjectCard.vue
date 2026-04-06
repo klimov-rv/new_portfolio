@@ -98,10 +98,13 @@ const hoverTransform = {
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out both;
+  animation: fade-in-up 0.5s ease-out both;
 }
 
-/* Опционально: кастомные стили для CardContainer если нужно переопределить */
+.project-card {
+  cursor: pointer;
+}
+
 .project-card:hover {
   &:deep(.project-card__subtitle) {
     color: white;

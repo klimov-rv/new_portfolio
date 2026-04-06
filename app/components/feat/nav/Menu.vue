@@ -26,16 +26,25 @@ const items = ref<NavigationMenuItem[]>([
 </template>
 <style lang="scss">
 .main-nav-menu {
-  --ui-bg-elevated: rgba(0, 0, 0, 0.1);
+  --ui-radius: 50px;
+  --ui-bg-elevated: rgba(255, 255, 255, 0.1);
+  a:hover span {
+    color: white;
+  }
   a,
   span {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgb(211 210 210 / 90%);
+    filter: invert(1) contrast(10);
   }
   li {
     padding-top: 0;
     padding-bottom: 0;
   }
 
+  .iconify {
+    height: 14px;
+    width: 14px;
+  }
   .iconify + span > .iconify {
     display: none;
   }

@@ -12,7 +12,7 @@
         :scale="-160"
         :frost="0.08"
         container-class="w-full"
-        class="px-6 py-3"
+        class="px-6 py-2"
       >
         <nav class="flex items-center justify-between">
           <NuxtLink to="/" class="logo-text">
@@ -75,7 +75,8 @@
 .logo-text {
   font-family: ui-monospace, 'Courier New', monospace;
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 600;
+  letter-spacing: 1.9px;
   .dash {
     color: #21b3a9;
   }

@@ -8,14 +8,19 @@ if (process.client) {
     // Даем время на загрузку дочерних компонентов
     setTimeout(() => {
       markComponentLoaded('AppRoot');
-    }, 100);
+    }, 1100);
   });
 }
+
+const appLoadClass = computed(() => [
+  isLoading.value ? 'is-app-loading' : 'is-app-not-loading',
+]);
 </script>
 <template>
-  <NuxtLayout>
+  <NuxtLayout :class="appLoadClass">
     <NuxtLoadingIndicator />
     <div v-if="isLoading" class="global-loader">
+      <!-- Logo with TextGlitch effect (effect 2) -->
       <UiTextGlitch
         text="klimovproject_"
         class="!text-xl !font-bold !font-mono !text-white"

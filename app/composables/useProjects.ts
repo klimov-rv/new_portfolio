@@ -17,6 +17,125 @@ export interface Project {
 export const useProjects = () => {
   const projects: Project[] = [
     {
+      id: 'ege-kritsky',
+      year: 2026,
+      title: 'ЕГЭ / Крицкий',
+      subtitle: 'Платформа для подготовки к ЕГЭ',
+      type: 'Фронтенд-разработка',
+      description:
+        'Платформа для генерации уникальных вариантов ЕГЭ по литературе с конструктором, личным кабинетом и системой подписок.',
+      details:
+        'Разработка фронтенда на Nuxt 4 с интеграцией конструктора вариантов ЕГЭ. Реализация личного кабинета с управлением подписками, историей платежей и сохранёнными вариантами. Оптимизация работы с большими объёмами данных (база знаний ~9.5МБ) через серверное кеширование (Nitro). <a href="/fsdf/dfdsf.pdf">link</a> Адаптивная вёрстка, интерактивные элементы и интеграция с системой оплаты. Создание демо-страницы с предопределённым вариантом ("Вариант недели") для ознакомления пользователей с функционалом платформы.',
+      preview: '/projects_thumb/ege-kritsky.webp',
+      video_preview: '/projects_thumb/ege-kritsky-main.webp',
+      video: '/video/ege-kritsky-vid.webm',
+      tags: [
+        'Nuxt 4',
+        'SSR/SSG',
+        'Vue 3',
+        'TypeScript',
+        'Pinia',
+        'Tailwind CSS',
+        'Nitro',
+        'Кеширование',
+        'Docker',
+        'Redis',
+        'PDF Generation',
+      ],
+      // links: [
+      //   {
+      //     label: 'Демо-сайт',
+      //     url: 'https://kritsky-demo.vercel.app/',
+      //   },
+      //   {
+      //     label: 'Конструктор',
+      //     url: 'https://kritsky-demo.vercel.app/create-variant',
+      //   },
+      //   {
+      //     label: 'Авторский вариант',
+      //     url: 'https://kritsky-demo.vercel.app/author-variant',
+      //   },
+      // ],
+      demo_links: [
+        {
+          label: 'Демо-вариант',
+          url: 'https://kritsky-demo.vercel.app/',
+        },
+        {
+          label: 'Конструктор',
+          url: 'https://kritsky-demo.vercel.app/create-variant',
+        },
+        {
+          label: 'Авторский вариант',
+          url: 'https://kritsky-demo.vercel.app/author-variant',
+        },
+      ],
+    },
+    {
+      id: 'kefirium',
+      year: 2024,
+      title: 'Kefirium',
+      subtitle: 'Web3-экосистема: NFT-цеха, дропы и геймификация',
+      type: 'Фронтенд-разработка, Team Lead',
+      description:
+        'Разработка и лидирование фронтенда Web3-проекта с NFT-маркетплейсом, реальными активами и геймификацией. Внедрение передовых технологий для оптимизации производительности и UX.',
+      details:
+        'Масштабная миграция с Nuxt 2 на Nuxt 3 с внедрением TypeScript и FSD. Разработка функционала NFT-цехов, дропов и стейкинга. Интеграция WebSockets для real-time обновления статусов. Реализация сложных анимаций открытия NFT-боксов и бочек с использованием GSAP. Оптимизация производительности и UX при высоких нагрузках во время дропов.   Организовал многоконтурную среду (dev/test/stage/prod), что снизило количество ошибок в продакшене. Согласовывал форматы данных с Backend и Blockchain командами, исключив разработку на моках и двойную работу. Внедрил обязательный прогон позитивных сценариев перед передачей в QA и проводил регулярные код-ревью.',
+
+      preview: '/projects_thumb/kefirium_thumb.webp',
+      video_preview: '/projects_thumb/kefirium-main.webp',
+      video: '/video/kefirium-vid.webm',
+      tags: [
+        'Nuxt.js',
+        'Vue.js',
+        'TypeScript',
+        'Web3',
+        'NFT',
+        'WebSockets',
+        'GSAP',
+        'FSD',
+        'Docker',
+        'Pinia',
+      ],
+      links: [
+        {
+          label: 'Реальный сайт',
+          url: 'https://kefirium.ru/',
+        },
+        {
+          label: 'Страница Кефирные Цеха',
+          url: 'https://kefirium.ru/factories',
+        },
+        {
+          label: 'Дроп NFT кефирного цеха',
+          url: 'https://kefirium.ru/drop/factory',
+        },
+        {
+          label: 'Дроп NFT боксов (1ый тираж)',
+          url: 'https://kefirium.ru/drop/kefiriumbox1',
+        },
+        {
+          label: 'Дроп NFT боксов (Новогодний тираж)',
+          url: 'https://kefirium.ru/drop/kefiriumbox2025',
+        },
+        {
+          label: 'Коллекции на TON',
+          url: 'https://kefirium.ru/categories/ton-only',
+        },
+      ],
+      demo_links: [
+        {
+          label: 'Figma - функционал кифирного цеха',
+          url:
+            'https://www.figma.com/proto/hoDw2xOEuzjJVs0cg75JSW?node-id=0-1&t=xVWnfTiMoGU1I2LW-6',
+        },
+        {
+          label: 'UI Kit + Юзкейсы импорта, минта токенов TON/Metamask кошельков',
+          url: 'https://www.figma.com/design/L2iiVvywDrSqkeS8FRYtUh/%D0%AE%D0%B7%D0%B5%D1%80%D0%BA%D0%B5%D0%B9%D1%81%D1%8B-%D0%BF%D0%BE-%D1%81%D0%B5%D1%82%D1%8F%D0%BC--%D0%BA%D0%BE%D0%BC%D0%B8%D1%81%D1%81%D0%B8%D1%8F%D0%BC--Copy---Copy---Copy-?node-id=579-2549',
+        }, 
+      ],
+    },
+    {
       id: 'guestcard-barnaul',
       year: 2023,
       title: 'Guestcard города Барнаул',

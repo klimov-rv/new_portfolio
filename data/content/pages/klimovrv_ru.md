@@ -27,7 +27,7 @@
 
 ---
 
-[TALYMAIN](https://kefirium.ru/)
+[TALYMAIN](/project/kefirium)
 
 Янв 2024 - Окт 2025
 
@@ -55,7 +55,7 @@ Klimov Project − это web-студия, специализирующаяся
 
 ---
 
-[PERCo](https://perco.com/)
+[PERCo](/project/perco)
 
 Июн 2021 - Авг 2022
 
@@ -69,7 +69,7 @@ PERCo − ведущий производитель оборудования д�
 
 ---
 
-[Segment](https://segment.ru/)
+[Segment](/project/segment)
 
 Сен 2020 - Фев 2021
 

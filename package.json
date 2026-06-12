@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "deploy": "npm run generate && node scripts/deploy.js"
   },
   "dependencies": {
     "@inspira-ui/plugins": "^0.0.2",

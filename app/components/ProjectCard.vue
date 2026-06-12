@@ -51,7 +51,7 @@ const hoverTransform = {
     <!-- 3D Card с изображением -->
     <FeatCardContainer>
       <FeatCardBody
-        class="group/card relative w-full aspect-[4/3] rounded-xl border-0 bg-transparent p-0"
+        class="group/card relative w-full aspect-[10/6] rounded-xl border-0 bg-transparent p-0"
       >
         <!-- Year + subtitle label   -->
         <FeatCardBody

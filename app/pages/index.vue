@@ -4,13 +4,13 @@ const { projects } = useProjects();
 
 <template>
   <div class="relative min-h-screen">
-    <div class="relative z-10 pt-28 pb-16 px-1 sm:p-6 lg:px-8">
-      <div class="text-center mb-16 space-y-2">
-        <p class="font-mono text-white/50 text-xs uppercase tracking-[0.4em]">
-          Frontend Developer · 2015–2026
-        </p>
-        <p class="font-mono text-white/30 text-xs uppercase tracking-[0.6em]">
+    <div class="relative z-10 pb-16 px-1 sm:p-6 lg:px-8">
+      <div class="text-center mb-16 pt-28 space-y-2">
+        <p class="font-mono text-xs uppercase text-white/90 tracking-[0.4em]">
           Selected Works
+        </p>
+        <p class="font-mono text-xs uppercase text-white/50 tracking-[0.6em]">
+          Frontend Developer · 2015–2026
         </p>
       </div>
 

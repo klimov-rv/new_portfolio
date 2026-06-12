@@ -65,7 +65,7 @@ useSeoMeta({
         </h1>
         <!-- Preview / Video block -->
         <div
-          class="relative rounded-2xl overflow-hidden mb-14 bg-black/30 aspect-video animate-slide-in"
+          class="relative rounded-2xl overflow-hidden mb-14 bg-black/30 aspect-[16/8] animate-slide-in"
           style="animation-delay: 100ms;"
         >
           <template v-if="project.video">

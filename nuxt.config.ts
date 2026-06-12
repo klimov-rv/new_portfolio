@@ -11,6 +11,14 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
     head: htmlHeaders,
   },
+  routeRules: {
+    '/': {
+      prerender: true,
+    },
+    '/cv': {
+      prerender: true,
+    },
+  },
   alias: {
     components: fileURLToPath(new URL('./app/components', import.meta.url)),
     shaders: fileURLToPath(new URL('./app/assets/shaders', import.meta.url)),

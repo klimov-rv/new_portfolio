@@ -8,15 +8,15 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="min-h-screen">
-    <div class="relative z-10 pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+  <div class="relative min-h-screen">
+    <div class="relative z-10 pb-16 px-1 sm:p-6 lg:px-8">
       <!-- Header -->
-      <div class="text-center mb-12 space-y-2">
-        <p class="font-mono text-xs uppercase tracking-[0.4em] font-semibold">
-          Климов Роман • Frontend Developer
-        </p>
-        <p class="font-mono text-white/70 text-xs uppercase tracking-[0.6em]">
+      <div class="text-center mb-12 pt-28 space-y-2">
+        <p class="font-mono text-xs text-white/90 uppercase tracking-[0.4em]">
           Curriculum vitae
+        </p>
+        <p class="font-mono text-xs uppercase text-white/50 tracking-[0.6em]">
+          Климов Роман • Frontend Developer
         </p>
       </div>
 
@@ -37,24 +37,20 @@ useSeoMeta({
 
 <style lang="scss">
 .cv-content {
-  // Color variables
   --accent: #21b3a9;
   --border-light: rgba(255, 255, 255, 0.1);
   --bg-glass: rgba(255, 255, 255, 0.03);
 
-  // Typography
   font-size: 16px;
   line-height: 1.6;
   font-family: monospace;
 
-  // Headers
   h1 {
     display: none;
     font-size: 32px;
     line-height: 2em;
     font-weight: 300;
     text-align: center;
-    color: white;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     background: linear-gradient(135deg, #fff 0%, #b8fffa 100%);
@@ -97,7 +93,6 @@ useSeoMeta({
     margin-top: 0;
   }
 
-  // Paragraphs
   p {
     margin-bottom: 1rem;
     line-height: 1.625;
@@ -140,7 +135,6 @@ useSeoMeta({
     }
   }
 
-  // Links
   a {
     color: white;
     text-decoration: none;
@@ -395,8 +389,6 @@ useSeoMeta({
 @media print {
   .cv-content {
     color: black;
-
-    --accent: #0b5e42;
     --accent: #0b5e42;
     --border-light: rgba(0, 0, 0, 0);
 

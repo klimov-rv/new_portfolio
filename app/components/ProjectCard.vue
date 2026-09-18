@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Project } from '~/composables/useProjects';
+import type { Project } from '~/types/project';
 
 const props = defineProps<{
   project: Project;
@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const openProject = () => router.push(`/project/${props.project.id}`);
+const handleProjectOpen = () => router.push(`/project/${props.project.id}`);
 
 const cardStyle = computed(() => ({
   animationDelay: `${props.index * 80}ms`,
@@ -46,7 +46,7 @@ const hoverTransform = {
   <div
     class="project-card animate-fade-in-up"
     :style="cardStyle"
-    @click="openProject"
+    @click="handleProjectOpen"
   >
     <!-- 3D Card с изображением -->
     <FeatCardContainer>

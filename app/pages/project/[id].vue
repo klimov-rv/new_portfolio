@@ -2,7 +2,11 @@
 const route = useRoute();
 const { getProject } = useProjects();
 
-const project = computed(() => getProject(route.params.id as string));
+const projectId = computed(() => {
+  const routeId = route.params.id;
+  return Array.isArray(routeId) ? routeId[0] : routeId;
+});
+const project = computed(() => getProject(projectId.value ?? ''));
 
 if (!project.value) {
   throw createError({ statusCode: 404, statusMessage: 'Project not found' });
@@ -11,7 +15,7 @@ if (!project.value) {
 const isVideoPlaying = ref(false);
 const videoRef = ref<HTMLVideoElement | null>(null);
 
-const toggleVideo = () => {
+const handleVideoToggle = (): void => {
   if (!videoRef.value) return;
   if (isVideoPlaying.value) {
     videoRef.value.pause();
@@ -83,7 +87,7 @@ useSeoMeta({
               <button
                 v-show="!isVideoPlaying"
                 class="absolute inset-0 flex items-center justify-center"
-                @click="toggleVideo"
+                @click="handleVideoToggle"
               >
                 <div
                   class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-all hover:scale-110 hover:bg-white/20"
@@ -95,7 +99,7 @@ useSeoMeta({
             <button
               v-if="isVideoPlaying"
               class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center hover:bg-black/60 transition-colors"
-              @click="toggleVideo"
+              @click="handleVideoToggle"
             >
               <UiPause />
             </button>
@@ -145,9 +149,8 @@ useSeoMeta({
               </h3>
               <div class="flex flex-wrap gap-2">
                 <ul>
-                  <li v-for="demo_link in project.demo_links">
+                    <li v-for="demo_link in project.demo_links" :key="demo_link.label">
                     <a
-                      :key="demo_link.label"
                       :href="demo_link.url"
                       target="_blank"
                       class="flex items-center gap-2 font-mono text-sm text-white/50 hover:text-white transition-colors group"

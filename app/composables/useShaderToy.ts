@@ -3,10 +3,15 @@ import { useShaderState } from './useShaderState';
 import type { UseShaderToyOptions } from '~/types/shader';
 import isWebGLSupported from '~/utils/webgl';
 
+export interface UseShaderToyReturn {
+  pause: () => void;
+  play: () => void;
+}
+
 export function useShaderToy(
   containerRef: Ref<HTMLElement | null>,
   options: UseShaderToyOptions,
-) {
+): UseShaderToyReturn {
   const shaderState = useShaderState();
   let shader: InspiraShaderToy | undefined;
 

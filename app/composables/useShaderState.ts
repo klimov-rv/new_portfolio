@@ -1,6 +1,26 @@
 import type { ShaderController, Position } from '~/types/shader';
 
-export const useShaderState = () => {
+export interface UseShaderStateReturn {
+  hue: Ref<number>;
+  saturation: Ref<number>;
+  brightness: Ref<number>;
+  speed: Ref<number>;
+  isPlaying: Ref<boolean>;
+  registerController: (controller: ShaderController) => void;
+  pause: () => void;
+  play: () => void;
+  restart: () => void;
+  setHue: (hue: number) => void;
+  setSpeed: (speed: number) => void;
+  setSaturation: (saturation: number) => void;
+  setBrightness: (brightness: number) => void;
+  setMouseForce: (force: number) => void;
+  setMouseSize: (size: number) => void;
+  updateShaderMouse: (position: Position) => void;
+  setMouseDown: (isDown: boolean) => void;
+}
+
+export const useShaderState = (): UseShaderStateReturn => {
   const controller = useState<ShaderController | null>(
     'shader-controller',
     () => null,

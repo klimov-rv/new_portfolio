@@ -1,20 +1,11 @@
-export interface Project {
-  id: string;
-  year: number;
-  title: string;
-  subtitle: string;
-  type: string;
-  description: string;
-  details: string;
-  preview: string;
-  video_preview?: string;
-  video?: string;
-  links?: { label: string; url: string }[];
-  demo_links?: { label: string; url: string }[];
-  tags: string[];
+import type { Project } from '~/types/project';
+
+export interface UseProjectsReturn {
+  projects: Project[];
+  getProject: (id: string) => Project | undefined;
 }
 
-export const useProjects = () => {
+export const useProjects = (): UseProjectsReturn => {
   const projects: Project[] = [
     {
       id: 'ege-kritsky',

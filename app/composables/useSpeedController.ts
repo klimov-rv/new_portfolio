@@ -1,4 +1,14 @@
-export function useSpeedController(initialSpeed: number = 1) {
+export interface UseSpeedControllerReturn {
+  currentSpeed: Ref<number>;
+  targetSpeed: Ref<number>;
+  isAnimating: Ref<boolean>;
+  setTargetSpeed: (newSpeed: number) => void;
+  startAnimation: (speed: number) => void;
+}
+
+export function useSpeedController(
+  initialSpeed: number = 1,
+): UseSpeedControllerReturn {
   const targetSpeed = ref(initialSpeed);
   const currentSpeed = ref(initialSpeed);
   const isAnimating = ref(false);

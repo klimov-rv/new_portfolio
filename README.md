@@ -49,7 +49,16 @@ app/
 │   ├── ProjectCard.vue        # Карточка проекта
 │   └── ProjectNav.vue         # Навигация между проектами
 ├── composables/
-│   └── useProjects.ts         # Данные всех проектов
+│   ├── useProjects.ts         # Данные всех проектов
+│   ├── useCanvas.ts           # Canvas-рендеринг курсорного хвоста
+│   ├── useLines.ts            # Физика линий курсорного хвоста
+│   ├── useMouseVelocity.ts    # Скорость движения мыши
+│   └── ...                    # Остальные composables эффектов
+├── types/
+│   ├── project.ts             # Контракты проектов и ссылок
+│   └── shader.ts              # Контракты shader API
+├── utils/
+│   └── webgl.ts               # Проверка поддержки WebGL
 ├── layouts/
 │   └── default.vue            # Layout с меню
 ├── pages/

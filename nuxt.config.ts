@@ -5,6 +5,10 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
   compatibilityDate: '2026-01-01',
   devtools: { enabled: true },
+  typescript: {
+    strict: true,
+    typeCheck: true,
+  },
   modules: ['@nuxt/ui', '@nuxt/content', '@nuxt/image'],
   css: ['~/assets/css/main.css'],
   app: {

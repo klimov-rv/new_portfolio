@@ -1,9 +1,15 @@
+export interface UseTargetObserverReturn {
+  init: () => void;
+  destroy: () => void;
+  refresh: () => void;
+}
+
 export function useTargetObserver(
   selector: string,
   root: HTMLElement | null,
   onEnter: () => void,
   onLeave: () => void,
-) {
+): UseTargetObserverReturn {
   const activeElements = new Set<HTMLElement>();
   let observer: MutationObserver | null = null;
 
@@ -41,7 +47,7 @@ export function useTargetObserver(
             if (node.nodeType === 1) {
               const el = node as HTMLElement;
               if (el.matches?.(selector)) addListeners(el);
-              el.querySelectorAll?.(selector).forEach(addListeners);
+              el.querySelectorAll<HTMLElement>(selector).forEach(addListeners);
             }
           });
 
@@ -49,7 +55,9 @@ export function useTargetObserver(
             if (node.nodeType === 1) {
               const el = node as HTMLElement;
               if (el.matches?.(selector)) removeListeners(el);
-              el.querySelectorAll?.(selector).forEach(removeListeners);
+              el
+                .querySelectorAll<HTMLElement>(selector)
+                .forEach(removeListeners);
             }
           });
         } else if (

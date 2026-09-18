@@ -1,4 +1,11 @@
-export const useAppLoading = () => {
+export interface UseAppLoadingReturn {
+  isLoading: Readonly<Ref<boolean>>;
+  registerComponent: (componentName: string) => void;
+  markComponentLoaded: (componentName: string) => void;
+  resetLoading: () => void;
+}
+
+export const useAppLoading = (): UseAppLoadingReturn => {
   const isLoading = useState<boolean>('app:loading', () => true);
   const componentsLoaded = useState<Set<string>>(
     'app:components-loaded',

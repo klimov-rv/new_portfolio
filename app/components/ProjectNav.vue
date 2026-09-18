@@ -1,23 +1,35 @@
 <script setup lang="ts">
-const props = defineProps<{ currentId: string }>()
-const { projects } = useProjects()
+interface Props {
+  currentId: string;
+}
 
-const currentIndex = computed(() => projects.findIndex(p => p.id === props.currentId))
-const prevProject = computed(() => currentIndex.value > 0 ? projects[currentIndex.value - 1] : null)
-const nextProject = computed(() => currentIndex.value < projects.length - 1 ? projects[currentIndex.value + 1] : null)
+const props = defineProps<Props>();
+const { projects } = useProjects();
+
+const currentIndex = computed(() =>
+  projects.findIndex((project) => project.id === props.currentId),
+);
+const previousProject = computed(() =>
+  currentIndex.value > 0 ? projects[currentIndex.value - 1] : null,
+);
+const nextProject = computed(() =>
+  currentIndex.value < projects.length - 1
+    ? projects[currentIndex.value + 1]
+    : null,
+);
 </script>
 
 <template>
   <div class="border-t border-white/10 pt-8 flex justify-between items-center gap-4">
     <NuxtLink
-      v-if="prevProject"
-      :to="`/project/${prevProject.id}`"
+      v-if="previousProject"
+      :to="`/project/${previousProject.id}`"
       class="group flex items-center gap-3 text-white/40 hover:text-white transition-colors"
     >
       <span class="group-hover:-translate-x-1 transition-transform text-lg">←</span>
       <div>
         <div class="font-mono text-xs uppercase tracking-widest mb-1">Предыдущий</div>
-        <div class="text-sm font-medium">{{ prevProject.title }}</div>
+        <div class="text-sm font-medium">{{ previousProject.title }}</div>
       </div>
     </NuxtLink>
     <div v-else />

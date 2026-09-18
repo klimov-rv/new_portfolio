@@ -1,12 +1,20 @@
+import type { CursorLine } from './useLines';
+
+export interface UseCanvasReturn {
+  ctx: CanvasRenderingContext2D | undefined;
+  resizeCanvas: () => void;
+  start: (event: MouseEvent | TouchEvent) => void;
+  init: () => void;
+  cleanup: () => void;
+}
+
 export const useCanvas = (
   canvasRef: Ref<HTMLCanvasElement | null>,
   lines: ReturnType<typeof useLines>,
   wave: ReturnType<typeof useWave>,
-) => {
-  let ctx: (CanvasRenderingContext2D & {
-    running?: boolean;
-    frame?: number;
-  }) | undefined = undefined;
+): UseCanvasReturn => {
+  let ctx: CanvasRenderingContext2D | undefined;
+  let isRunning = false;
   let animationFrame: number;
 
   const resizeCanvas = () => {
@@ -17,17 +25,23 @@ export const useCanvas = (
   };
 
   const render = () => {
-    if (!ctx?.running) return;
+    if (!ctx || !isRunning) return;
+    const renderingContext = ctx;
 
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.strokeStyle = `hsla(${Math.round(wave.update())},50%,50%,0.2)`;
-    ctx.lineWidth = 1;
+    renderingContext.globalCompositeOperation = 'source-over';
+    renderingContext.clearRect(
+      0,
+      0,
+      renderingContext.canvas.width,
+      renderingContext.canvas.height,
+    );
+    renderingContext.globalCompositeOperation = 'lighter';
+    renderingContext.strokeStyle = `hsla(${Math.round(wave.update())},50%,50%,0.2)`;
+    renderingContext.lineWidth = 1;
 
-    lines.lines.value.forEach((line: any) => {
+    lines.lines.value.forEach((line: CursorLine) => {
       lines.updateLine(line);
-      lines.drawLine(ctx, line.nodes);
+      lines.drawLine(renderingContext, line.nodes);
     });
 
     animationFrame = requestAnimationFrame(render);
@@ -37,22 +51,27 @@ export const useCanvas = (
     const canvas = canvasRef.value;
     if (!canvas) return;
 
-    ctx = canvas.getContext('2d') as any;
-    ctx.running = true;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    ctx = context;
+    isRunning = true;
     resizeCanvas();
     render();
   };
 
   const start = (e: MouseEvent | TouchEvent) => {
     lines.initLines(e);
-    if (!ctx?.running) {
-      ctx.running = true;
+    const activeContext = ctx;
+    if (!activeContext || !isRunning) {
+      if (!activeContext) return;
+      isRunning = true;
       render();
     }
   };
 
   const cleanup = () => {
-    if (ctx) ctx.running = false;
+    isRunning = false;
     if (animationFrame) cancelAnimationFrame(animationFrame);
   };
 

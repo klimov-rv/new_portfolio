@@ -9,11 +9,16 @@ interface TailConfig {
   startOffset?: number;
 }
 
+export interface UseCursorTailReturn {
+  init: () => void;
+  destroy: () => void;
+}
+
 export function useCursorTail(
   svgElement: Ref<SVGElement | null>,
   mousePos: Position,
   config: TailConfig = {},
-) {
+): UseCursorTailReturn {
   const {
     totalLines = 130,
     ease = 0.97,

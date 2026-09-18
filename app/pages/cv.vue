@@ -2,8 +2,8 @@
 const cvContent = await queryCollection('pages').path(`/klimovrv_ru`).first();
 
 useSeoMeta({
-  title: cvContent.value?.title,
-  description: cvContent.value?.description,
+  title: cvContent?.title,
+  description: cvContent?.description,
 });
 </script>
 

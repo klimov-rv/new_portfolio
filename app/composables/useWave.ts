@@ -1,4 +1,8 @@
-export const useWave = () => {
+export interface UseWaveReturn {
+  update: () => number;
+}
+
+export const useWave = (): UseWaveReturn => {
   const phase = ref(Math.random() * 2 * Math.PI);
   const offset = 285;
   const frequency = 0.0015;

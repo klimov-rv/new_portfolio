@@ -1,14 +1,40 @@
-export const useLines = (config: ReturnType<typeof useTrailConfig>) => {
-  const lines = ref<any[]>([]);
+import type { UseTrailConfigReturn } from './useTrailConfig';
+
+export interface CursorNode {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
+
+export interface CursorLine {
+  spring: number;
+  nodes: CursorNode[];
+  friction: number;
+}
+
+export interface UseLinesReturn {
+  pos: { x: number; y: number };
+  lines: Ref<CursorLine[]>;
+  updateLine: (line: CursorLine) => void;
+  drawLine: (ctx: CanvasRenderingContext2D, nodes: CursorNode[]) => void;
+  updatePosition: (event: MouseEvent | TouchEvent) => void;
+  initLines: (event: MouseEvent | TouchEvent) => void;
+}
+
+export const useLines = (
+  configState: UseTrailConfigReturn,
+): UseLinesReturn => {
+  const lines = ref<CursorLine[]>([]);
   const pos = reactive({ x: 0, y: 0 });
 
   const random = (min: number, max: number) =>
     Math.random() * (max - min) + min;
 
   const createLines = (startX: number, startY: number) => {
-    return Array.from({ length: config.value.trails }, (_, i) => {
-      const spring = 0.4 + (i / config.value.trails) * 0.025;
-      const nodes = Array.from({ length: config.value.size }, () => ({
+    return Array.from({ length: configState.config.value.trails }, (_, i) => {
+      const spring = 0.4 + (i / configState.config.value.trails) * 0.025;
+      const nodes = Array.from({ length: configState.config.value.size }, () => ({
         x: startX,
         y: startY,
         vx: 0,
@@ -18,55 +44,74 @@ export const useLines = (config: ReturnType<typeof useTrailConfig>) => {
       return {
         spring,
         nodes,
-        friction: config.value.friction + random(-0.002, 0.01),
+        friction: configState.config.value.friction + random(-0.002, 0.01),
       };
     });
   };
 
-  const updateLine = (line: any) => {
+  const updateLine = (line: CursorLine): void => {
     const { nodes, spring } = line;
     let currentSpring = spring;
 
-    nodes[0].vx += (pos.x - nodes[0].x) * currentSpring;
-    nodes[0].vy += (pos.y - nodes[0].y) * currentSpring;
+    const firstNode = nodes[0];
+    if (!firstNode) return;
+
+    firstNode.vx += (pos.x - firstNode.x) * currentSpring;
+    firstNode.vy += (pos.y - firstNode.y) * currentSpring;
 
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
+      if (!node) continue;
 
       if (i > 0) {
         const prev = nodes[i - 1];
+        if (!prev) continue;
         node.vx += (prev.x - node.x) * currentSpring;
         node.vy += (prev.y - node.y) * currentSpring;
-        node.vx += prev.vx * config.value.dampening;
-        node.vy += prev.vy * config.value.dampening;
+        node.vx += prev.vx * configState.config.value.dampening;
+        node.vy += prev.vy * configState.config.value.dampening;
       }
 
       node.vx *= line.friction;
       node.vy *= line.friction;
       node.x += node.vx;
       node.y += node.vy;
-      currentSpring *= config.value.tension;
+      currentSpring *= configState.config.value.tension;
     }
   };
 
-  const drawLine = (ctx: CanvasRenderingContext2D, nodes: any[]) => {
+  const drawLine = (
+    ctx: CanvasRenderingContext2D,
+    nodes: CursorNode[],
+  ): void => {
     if (nodes.length < 3) return;
 
     ctx.beginPath();
-    ctx.moveTo(nodes[0].x, nodes[0].y);
+    const firstNode = nodes[0];
+    if (!firstNode) return;
+
+    ctx.moveTo(firstNode.x, firstNode.y);
 
     for (let i = 1; i < nodes.length - 2; i++) {
-      const xc = (nodes[i].x + nodes[i + 1].x) / 2;
-      const yc = (nodes[i].y + nodes[i + 1].y) / 2;
-      ctx.quadraticCurveTo(nodes[i].x, nodes[i].y, xc, yc);
+      const node = nodes[i];
+      const nextNode = nodes[i + 1];
+      if (!node || !nextNode) continue;
+
+      const xc = (node.x + nextNode.x) / 2;
+      const yc = (node.y + nextNode.y) / 2;
+      ctx.quadraticCurveTo(node.x, node.y, xc, yc);
     }
 
     const last = nodes.length - 2;
+    const lastNode = nodes[last];
+    const endNode = nodes[last + 1];
+    if (!lastNode || !endNode) return;
+
     ctx.quadraticCurveTo(
-      nodes[last].x,
-      nodes[last].y,
-      nodes[last + 1].x,
-      nodes[last + 1].y,
+      lastNode.x,
+      lastNode.y,
+      endNode.x,
+      endNode.y,
     );
 
     ctx.stroke();
@@ -80,8 +125,11 @@ export const useLines = (config: ReturnType<typeof useTrailConfig>) => {
     // sideeffect updateVelocity
     updateVelocity(e);
     if ('touches' in e && e.touches.length) {
-      pos.x = e.touches[0].pageX;
-      pos.y = e.touches[0].pageY;
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      pos.x = touch.pageX;
+      pos.y = touch.pageY;
     } else if ('clientX' in e) {
       pos.x = e.clientX;
       pos.y = e.clientY;

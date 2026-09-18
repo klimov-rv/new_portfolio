@@ -1,6 +1,12 @@
 import type { Position } from '~/types/shader';
 
-export function useMouseVelocity() {
+export interface UseMouseVelocityReturn {
+  velocity: Ref<Position>;
+  speed: Ref<number>;
+  update: (event: MouseEvent | TouchEvent) => Position;
+}
+
+export function useMouseVelocity(): UseMouseVelocityReturn {
   const velocity = ref<Position>({ x: 0, y: 0 });
   const lastPos = ref<Position>({ x: 0, y: 0 });
   const lastTime = ref(Date.now());
@@ -8,10 +14,13 @@ export function useMouseVelocity() {
 
   const update = (e: MouseEvent | TouchEvent) => {
     const pos: Position = { x: 0, y: 0 };
-    if ('touches' in e) {
-      pos.x = e.touches[0].pageX;
-      pos.y = e.touches[0].pageY;
-    } else {
+    if ('touches' in e && e.touches.length) {
+      const touch = e.touches[0];
+      if (!touch) return velocity.value;
+
+      pos.x = touch.pageX;
+      pos.y = touch.pageY;
+    } else if (e instanceof MouseEvent) {
       pos.x = e.clientX;
       pos.y = e.clientY;
     }

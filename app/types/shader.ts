@@ -1,3 +1,5 @@
+import type { HTMLAttributes } from 'vue';
+
 export interface HSVControls {
   hue?: number; // 0-360
   saturation?: number; // 0-1
@@ -21,7 +23,7 @@ export interface NoiseConfig {
 export interface ShaderProps extends ShaderControls {
   shaderCode: string;
   noise?: NoiseConfig;
-  class?: any;
+  class?: HTMLAttributes['class'];
 }
 
 // Опции для useShaderToy - те же что и пропсы, без class/noise

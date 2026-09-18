@@ -12,11 +12,9 @@ const props = withDefaults(defineProps<Props>(), {
   class: undefined,
 });
 
-const isLoadingImg = ref(true);
 const isErr = ref(false);
 const onErr = () => {
   isErr.value = true;
-  isLoadingImg.value = false;
 };
 const containerClass = computed(() => [
   'img__wrapper',

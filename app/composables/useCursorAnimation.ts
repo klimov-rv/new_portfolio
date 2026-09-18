@@ -1,9 +1,18 @@
 import gsap from 'gsap';
 
+export interface UseCursorAnimationReturn {
+  liquidGlassSize: Ref<number>;
+  createAnimations: (fullCursorSize: number, easing: gsap.EaseFunction) => void;
+  onEnter: () => void;
+  onLeave: () => void;
+  bump: () => gsap.core.Tween | undefined;
+  destroy: () => void;
+}
+
 export function useCursorAnimation(
   innerEl: Ref<HTMLElement | null>,
   outerEl: Ref<HTMLElement | null>,
-) {
+): UseCursorAnimationReturn {
   const liquidGlassSize = ref(0);
   let enlargeTween: gsap.core.Tween | null = null;
   let bumpTween: gsap.core.Tween | null = null;

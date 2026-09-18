@@ -2,8 +2,8 @@
 const cvContent = await queryCollection('pages').path(`/klimovrv_ru`).first();
 
 useSeoMeta({
-  title: cvContent?.title,
-  description: cvContent?.description,
+  title: cvContent?.title || 'CV — Климов Роман',
+  description: cvContent?.description || 'Frontend Developer',
 });
 </script>
 
@@ -148,7 +148,11 @@ useSeoMeta({
     // External link indicator
     &[href^='http']::after {
       content: '↗';
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family:
+        'Inter',
+        system-ui,
+        -apple-system,
+        sans-serif;
       display: inline-block;
       margin-left: 4px;
       font-size: 0.8em;

@@ -70,7 +70,7 @@ useSeoMeta({
         <!-- Preview / Video block -->
         <div
           class="relative rounded-2xl overflow-hidden mb-14 bg-black/30 aspect-[16/8] animate-slide-in"
-          style="animation-delay: 100ms;"
+          style="animation-delay: 100ms"
         >
           <template v-if="project.video">
             <video
@@ -117,7 +117,7 @@ useSeoMeta({
         <!-- Project details grid -->
         <div
           class="grid grid-cols-1 lg:grid-cols-4 gap-10 mb-14 animate-slide-in"
-          style="animation-delay: 200ms;"
+          style="animation-delay: 200ms"
         >
           <!-- <h1
             class="text-3xl sm:text-5xl font-bold text-white leading-tight mb-5"
@@ -149,7 +149,10 @@ useSeoMeta({
               </h3>
               <div class="flex flex-wrap gap-2">
                 <ul>
-                    <li v-for="demo_link in project.demo_links" :key="demo_link.label">
+                  <li
+                    v-for="demo_link in project.demo_links"
+                    :key="demo_link.label"
+                  >
                     <a
                       :href="demo_link.url"
                       target="_blank"

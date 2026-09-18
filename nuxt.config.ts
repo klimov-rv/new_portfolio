@@ -22,6 +22,14 @@ export default defineNuxtConfig({
     '/cv': {
       prerender: true,
     },
+    '/project/**': {
+      prerender: true,
+    },
+  },
+  nitro: {
+    prerender: {
+      routes: ['/project/**'],
+    },
   },
   alias: {
     components: fileURLToPath(new URL('./app/components', import.meta.url)),

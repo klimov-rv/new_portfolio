@@ -9,10 +9,22 @@ const __dirname = path.dirname(__filename);
 const CONFIG = {
     sourceDir: path.resolve(__dirname, '..', '.output', 'public'),
     targetDir: path.resolve(__dirname, '..', 'dist_gh'),
-    remoteUrl: 'https://github.com/klimov-rv/klimov-rv.github.io',
-    branch: 'master',
+    remoteUrl: process.env.DEPLOY_REMOTE_URL || 'https://github.com/klimov-rv/klimov-rv.github.io',
+    branch: process.env.DEPLOY_BRANCH || 'master',
     gitignoreFiles: ['.git', '.gitignore']
 };
+
+function getPushUrl(remoteUrl) {
+    const token = process.env.DEPLOY_TOKEN;
+    if (!token || !remoteUrl.startsWith('https://github.com/')) {
+        return remoteUrl;
+    }
+
+    const authenticatedUrl = new URL(remoteUrl);
+    authenticatedUrl.username = 'x-access-token';
+    authenticatedUrl.password = token;
+    return authenticatedUrl.toString();
+}
 
 function validateDirectory(dir, name) {
     if (!fs.existsSync(dir)) {
@@ -78,7 +90,7 @@ function executeGitCommands(targetDir, remoteUrl, branch) {
             ignoreError: true
         },
         {
-            cmd: `git push ${remoteUrl} ${branch}`,
+            cmd: `git push ${getPushUrl(remoteUrl)} ${branch}`,
             msg: 'Pushing to remote'
         }
     ];

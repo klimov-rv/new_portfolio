@@ -55,9 +55,9 @@ export function useTargetObserver(
             if (node.nodeType === 1) {
               const el = node as HTMLElement;
               if (el.matches?.(selector)) removeListeners(el);
-              el
-                .querySelectorAll<HTMLElement>(selector)
-                .forEach(removeListeners);
+              el.querySelectorAll<HTMLElement>(selector).forEach(
+                removeListeners,
+              );
             }
           });
         } else if (

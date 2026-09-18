@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { isLoading, registerComponent, markComponentLoaded } = useAppLoading();
+const { isLoading, registerComponent, finishLoading } = useAppLoading();
 
 // Ждём загрузки корневого компонента
 if (process.client) {
@@ -7,7 +7,7 @@ if (process.client) {
   onMounted(() => {
     // Даем время на загрузку дочерних компонентов
     setTimeout(() => {
-      markComponentLoaded('AppRoot');
+      finishLoading();
     }, 1100);
   });
 }

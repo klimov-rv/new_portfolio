@@ -22,9 +22,7 @@ export interface UseLinesReturn {
   initLines: (event: MouseEvent | TouchEvent) => void;
 }
 
-export const useLines = (
-  configState: UseTrailConfigReturn,
-): UseLinesReturn => {
+export const useLines = (configState: UseTrailConfigReturn): UseLinesReturn => {
   const lines = ref<CursorLine[]>([]);
   const pos = reactive({ x: 0, y: 0 });
 
@@ -34,12 +32,15 @@ export const useLines = (
   const createLines = (startX: number, startY: number) => {
     return Array.from({ length: configState.config.value.trails }, (_, i) => {
       const spring = 0.4 + (i / configState.config.value.trails) * 0.025;
-      const nodes = Array.from({ length: configState.config.value.size }, () => ({
-        x: startX,
-        y: startY,
-        vx: 0,
-        vy: 0,
-      }));
+      const nodes = Array.from(
+        { length: configState.config.value.size },
+        () => ({
+          x: startX,
+          y: startY,
+          vx: 0,
+          vy: 0,
+        }),
+      );
 
       return {
         spring,
@@ -107,12 +108,7 @@ export const useLines = (
     const endNode = nodes[last + 1];
     if (!lastNode || !endNode) return;
 
-    ctx.quadraticCurveTo(
-      lastNode.x,
-      lastNode.y,
-      endNode.x,
-      endNode.y,
-    );
+    ctx.quadraticCurveTo(lastNode.x, lastNode.y, endNode.x, endNode.y);
 
     ctx.stroke();
   };

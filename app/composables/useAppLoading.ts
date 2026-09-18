@@ -1,7 +1,7 @@
 export interface UseAppLoadingReturn {
   isLoading: Readonly<Ref<boolean>>;
   registerComponent: (componentName: string) => void;
-  markComponentLoaded: (componentName: string) => void;
+  finishLoading: () => void;
   resetLoading: () => void;
 }
 
@@ -24,13 +24,6 @@ export const useAppLoading = (): UseAppLoadingReturn => {
     }
   };
 
-  const markComponentLoaded = (componentName: string) => {
-    if (process.client && componentsLoaded.value.has(componentName)) {
-      componentsLoaded.value.delete(componentName);
-      checkAllComponentsLoaded();
-    }
-  };
-
   const checkAllComponentsLoaded = () => {
     if (process.client && componentsLoaded.value.size === 0) {
       // Даем время на гидратацию
@@ -45,10 +38,15 @@ export const useAppLoading = (): UseAppLoadingReturn => {
     componentsLoaded.value = new Set();
   };
 
+  const finishLoading = () => {
+    isLoading.value = false;
+    componentsLoaded.value = new Set();
+  };
+
   return {
     isLoading: readonly(isLoading),
     registerComponent,
-    markComponentLoaded,
+    finishLoading,
     resetLoading,
   };
 };

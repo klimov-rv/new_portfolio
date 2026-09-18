@@ -1,0 +1,44 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Checkout Pages repository
+        uses: actions/checkout@v4
+        with:
+          repository: klimov-rv/klimov-rv.github.io
+          ref: master
+          path: dist_gh
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify source
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run test
+          npm run generate
+
+      - name: Publish generated site
+        run: node scripts/deploy.js
+        env:
+          DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}

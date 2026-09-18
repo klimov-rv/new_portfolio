@@ -18,6 +18,10 @@ npm run dev
 - **Tailwind CSS** v4 via `@nuxt/ui`
 - **motion-v** — Spring animations
 - **@vueuse/core** — Composables
+- **@nuxt/content** — CV content collection
+- **@nuxt/image** — Project image optimization
+- **Vitest** — Unit tests
+- **Playwright** — E2E tests
 
 ## Эффекты inspira-ui (5 штук)
 
@@ -66,6 +70,42 @@ app/
 │   └── project/[id].vue       # Страница деталей проекта
 └── assets/css/main.css        # Tailwind + page transitions
 ```
+
+## Скрипты
+
+| Команда | Назначение |
+| --- | --- |
+| `npm run dev` | Локальный dev-сервер |
+| `npm run lint` | ESLint-проверка |
+| `npm run lint:fix` | Автоисправление ESLint |
+| `npm run typecheck` | Строгая проверка Nuxt/TypeScript |
+| `npm run test` | Unit-тесты Vitest |
+| `npm run test:e2e` | E2E-тесты Playwright |
+| `npm run build` | Production-сборка Nuxt |
+| `npm run generate` | Статическая генерация |
+| `npm run deploy` | Генерация и деплой в GitHub Pages |
+
+## Маршруты и рендеринг
+
+| Маршрут | Рендеринг | Данные | SEO |
+| --- | --- | --- | --- |
+| `/` | Prerender / SSG | `useProjects()` | Общие meta из `headers.js` |
+| `/cv` | Prerender / SSG | `queryCollection('pages')` | Content meta с fallback |
+| `/project/[id]` | Prerender / SSG | `useProjects()` + `useRoute()` | Динамический title |
+
+Список project routes задан в `nuxt.config.ts`, потому что каталог проектов является статическим. Подробности описаны в [docs/rendering.md](docs/rendering.md).
+
+## Production setup
+
+Сборки воспроизводимы через `package-lock.json`, `.nvmrc` и `.npmrc`. Для локальной установки используйте:
+
+```bash
+npm ci
+```
+
+CI запускается для `main`, `develop` и pull request в `main`. Production deploy запускается после push в `main` и публикует `.output/public` в GitHub Pages. Подробности: [docs/deployment.md](docs/deployment.md).
+
+Рабочий процесс веток и Conventional Commits описан в [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Описание работ
 

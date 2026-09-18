@@ -4,3 +4,9 @@ dist_gh
 .nuxt
 .output
 .data
+.env
+.env.*
+!.env.example
+coverage
+playwright-report
+test-results

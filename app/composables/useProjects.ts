@@ -117,14 +117,12 @@ export const useProjects = (): UseProjectsReturn => {
       demo_links: [
         {
           label: 'Figma - функционал кифирного цеха',
-          url:
-            'https://www.figma.com/proto/hoDw2xOEuzjJVs0cg75JSW?node-id=0-1&t=xVWnfTiMoGU1I2LW-6',
+          url: 'https://www.figma.com/proto/hoDw2xOEuzjJVs0cg75JSW?node-id=0-1&t=xVWnfTiMoGU1I2LW-6',
         },
         {
           label:
             'UI Kit + Юзкейсы импорта, минта токенов TON/Metamask кошельков',
-          url:
-            'https://www.figma.com/design/L2iiVvywDrSqkeS8FRYtUh/%D0%AE%D0%B7%D0%B5%D1%80%D0%BA%D0%B5%D0%B9%D1%81%D1%8B-%D0%BF%D0%BE-%D1%81%D0%B5%D1%82%D1%8F%D0%BC--%D0%BA%D0%BE%D0%BC%D0%B8%D1%81%D1%81%D0%B8%D1%8F%D0%BC--Copy---Copy---Copy-?node-id=579-2549',
+          url: 'https://www.figma.com/design/L2iiVvywDrSqkeS8FRYtUh/%D0%AE%D0%B7%D0%B5%D1%80%D0%BA%D0%B5%D0%B9%D1%81%D1%8B-%D0%BF%D0%BE-%D1%81%D0%B5%D1%82%D1%8F%D0%BC--%D0%BA%D0%BE%D0%BC%D0%B8%D1%81%D1%81%D0%B8%D1%8F%D0%BC--Copy---Copy---Copy-?node-id=579-2549',
         },
       ],
     },
@@ -154,8 +152,7 @@ export const useProjects = (): UseProjectsReturn => {
         },
         {
           label: 'Историческая линия',
-          url:
-            'https://guestcard.barnaul.org/objects/where_visit/istoricheskaya-liniya/',
+          url: 'https://guestcard.barnaul.org/objects/where_visit/istoricheskaya-liniya/',
         },
         {
           label: 'Календарь событий',
@@ -165,13 +162,11 @@ export const useProjects = (): UseProjectsReturn => {
       demo_links: [
         {
           label: 'Историческая линия',
-          url:
-            'https://klimovproject.online/barnaul.layout/historical_line.html',
+          url: 'https://klimovproject.online/barnaul.layout/historical_line.html',
         },
         {
           label: 'Исторический объект',
-          url:
-            'https://klimovproject.online/barnaul.layout/historical_object.html',
+          url: 'https://klimovproject.online/barnaul.layout/historical_object.html',
         },
         {
           label: 'Календарь событий',
@@ -207,8 +202,7 @@ export const useProjects = (): UseProjectsReturn => {
       links: [
         {
           label: 'Исходник figma',
-          url:
-            'https://www.figma.com/file/q4JMNnji6aFgADekHYVbmj/Muka?node-id=1%3A2&t=cjaNj5UYLpgh8CaI-0',
+          url: 'https://www.figma.com/file/q4JMNnji6aFgADekHYVbmj/Muka?node-id=1%3A2&t=cjaNj5UYLpgh8CaI-0',
         },
       ],
       demo_links: [
@@ -267,8 +261,7 @@ export const useProjects = (): UseProjectsReturn => {
       links: [
         {
           label: 'Исходник figma',
-          url:
-            'https://www.figma.com/file/0VMX7rZt3wAuUhvvjWEuBJ/%D0%9A%D0%B0%D1%80%D1%82%D0%B0-%D0%B6%D0%B5%D0%BB%D0%B0%D0%BD%D0%B8%D0%B9?node-id=194%3A2307&t=NdUXUyUVWUywVwSt-0',
+          url: 'https://www.figma.com/file/0VMX7rZt3wAuUhvvjWEuBJ/%D0%9A%D0%B0%D1%80%D1%82%D0%B0-%D0%B6%D0%B5%D0%BB%D0%B0%D0%BD%D0%B8%D0%B9?node-id=194%3A2307&t=NdUXUyUVWUywVwSt-0',
         },
       ],
       demo_links: [
@@ -299,8 +292,7 @@ export const useProjects = (): UseProjectsReturn => {
       links: [
         {
           label: 'Исходник figma',
-          url:
-            'https://www.figma.com/file/GKliJSXY44v2GQFlnpxoeM/%D0%9B%D0%B5%D0%BD%D0%B4%D0%B8%D0%BD%D0%B3-%D0%A1%D0%BA%D0%BE%D1%80%D0%BE%D1%81%D1%82%D0%BD%D1%8B%D0%B5',
+          url: 'https://www.figma.com/file/GKliJSXY44v2GQFlnpxoeM/%D0%9B%D0%B5%D0%BD%D0%B4%D0%B8%D0%BD%D0%B3-%D0%A1%D0%BA%D0%BE%D1%80%D0%BE%D1%81%D1%82%D0%BD%D1%8B%D0%B5',
         },
       ],
       demo_links: [
